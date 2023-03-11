@@ -400,14 +400,15 @@ class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
         self.llm = OpenAI(temperature=0)
-        self.i2t = ImageCaptioning(device="cuda:4")
-        self.t2i = T2I(device="cuda:1")
+        self.i2t = ImageCaptioning(device="cuda:1") # 1755
+        self.t2i = T2I(device="cuda:1") # 6677
         self.image2pose = image2pose()
-        self.pose2image = pose2image(device="cuda:3")
-        self.BLIPVQA = BLIPVQA(device="cuda:4")
+        self.pose2image = pose2image(device="cuda:1") # 6681
+        self.BLIPVQA = BLIPVQA(device="cuda:1") # 2709
         self.image2seg = image2seg()
-        self.seg2image = seg2image(device="cuda:7")
-        self.pix2pix = Pix2Pix(device="cuda:3")
+        self.seg2image = seg2image(device="cuda:1") # 5540
+        ## up until now, comsuming  23362 MB on GPU
+        self.pix2pix = Pix2Pix(device="cuda:2") # 2795
         self.coqui_tts = coqui_tts(device=False)
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
