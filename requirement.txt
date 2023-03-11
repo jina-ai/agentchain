@@ -30,3 +30,4 @@ openai
 accelerate
 openai-whisper==20230308
 TTS
+pandas
