@@ -389,7 +389,7 @@ class coqui_tts:
 
     def gen_speech_from_text(self, inputs):
         print("===>Starting text2speech Inference")
-        filename = str(uuid.uuid4()) + ".wav"
+        filename = os.path.join('audio', str(uuid.uuid4())[:8] + ".wav")
         self.tts.tts_to_file(text=inputs, speaker=self.tts.speakers[0], language=self.tts.languages[0],
                              file_path=filename)
 
@@ -469,7 +469,7 @@ class ConversationBot:
             agent_kwargs={'prefix': VISUAL_CHATGPT_PREFIX, 'format_instructions': VISUAL_CHATGPT_FORMAT_INSTRUCTIONS,
                           'suffix': VISUAL_CHATGPT_SUFFIX}, )
 
-    def run_text(self, text, state):
+    def run_text(self, text, state, audio):
         print("===============Running run_text =============")
         print("Inputs:", text, state)
         print("======>Previous memory:\n %s" % self.agent.memory)
@@ -477,9 +477,12 @@ class ConversationBot:
         res = self.agent({"input": text})
         print("======>Current memory:\n %s" % self.agent.memory)
         response = re.sub('(image/\S*png)', lambda m: f'![](/file={m.group(0)})*{m.group(0)}*', res['output'])
+        audio_files = re.findall('(audio/\S*wav)', response)
+        if len(audio_files) > 0:
+            audio = audio_files[0]
         state = state + [(text, response)]
         print("Outputs:", state)
-        return state, state
+        return state, state, audio
 
     def run_image(self, image, state, txt):
         print("===============Running run_image =============")
@@ -517,14 +520,17 @@ if __name__ == '__main__':
                 txt = gr.Textbox(show_label=False, placeholder="Enter text and press enter, or upload an image").style(
                     container=False)
             with gr.Column(scale=0.15, min_width=0):
-                clear = gr.Button("Clear️")
+                clear = gr.Button("Clear")
             with gr.Column(scale=0.15, min_width=0):
                 btn = gr.UploadButton("Upload", file_types=["image"])
+            with gr.Column(scale=0.15, min_width=0):
+                audio = gr.Audio(type="filepath")
 
-        txt.submit(bot.run_text, [txt, state], [chatbot, state])
+        txt.submit(bot.run_text, [txt, state, audio], [chatbot, state, audio])
         txt.submit(lambda: "", None, txt)
         btn.upload(bot.run_image, [btn, state, txt], [chatbot, state, txt])
         clear.click(bot.memory.clear)
         clear.click(lambda: [], None, chatbot)
         clear.click(lambda: [], None, state)
+
         demo.launch(server_name="0.0.0.0", server_port=7860)
