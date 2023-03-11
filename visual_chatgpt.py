@@ -14,7 +14,6 @@ from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.llms.openai import OpenAI
 import re
 import uuid
-from diffusers import StableDiffusionInpaintPipeline
 from PIL import Image
 import numpy as np
 from omegaconf import OmegaConf
@@ -26,13 +25,10 @@ import random
 from ldm.util import instantiate_from_config
 from ControlNet.cldm.model import create_model, load_state_dict
 from ControlNet.cldm.ddim_hacked import DDIMSampler
-from ControlNet.annotator.canny import CannyDetector
-from ControlNet.annotator.mlsd import MLSDdetector
 from ControlNet.annotator.util import HWC3, resize_image
-from ControlNet.annotator.hed import HEDdetector, nms
 from ControlNet.annotator.openpose import OpenposeDetector
 from ControlNet.annotator.uniformer import UniformerDetector
-from ControlNet.annotator.midas import MidasDetector
+import whisper
 
 VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
@@ -349,6 +345,16 @@ class BLIPVQA:
         answer = self.processor.decode(out[0], skip_special_tokens=True)
         return answer
 
+
+class Whisper:
+    def __init__(self, device):
+        print("Initializing Whisper on device", device)
+        self.model = whisper.load_model("base", device=device)
+
+    def transcribe(self, inputs):
+        return self.model.transcribe(inputs)['text']
+
+
 class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
@@ -361,6 +367,7 @@ class ConversationBot:
         self.image2seg = image2seg()
         self.seg2image = seg2image(device="cuda:7")
         self.pix2pix = Pix2Pix(device="cuda:3")
+        self.whisper = Whisper(device="cuda:0")
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
             Tool(name="Get Photo Description", func=self.i2t.inference,
@@ -390,7 +397,10 @@ class ConversationBot:
                              "The input to this tool should be a string, representing the image_path"),
             Tool(name="Generate Image Condition On Pose Image", func=self.pose2image.inference,
                  description="useful when you want to generate a new real image from both the user desciption and a human pose image. like: generate a real image of a human from this human pose image, or generate a new real image of a human from this pose. "
-                             "The input to this tool should be a comma seperated string of two, representing the image_path and the user description")]
+                             "The input to this tool should be a comma seperated string of two, representing the image_path and the user description"),
+            Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
+                 description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
+                             "The input to this tool should be a string, representing the audio_path")]
         self.agent = initialize_agent(
             self.tools,
             self.llm,
