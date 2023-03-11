@@ -385,7 +385,7 @@ class BLIPVQA:
 class Whisper:
     def __init__(self, device):
         print("Initializing Whisper on device", device)
-        self.model = whisper.load_model("base", device=device)
+        self.model = whisper.load_model("medium.en", device=device)
 
     def transcribe(self, inputs):
         return self.model.transcribe(inputs)['text']
@@ -524,6 +524,26 @@ class ConversationBot:
         print("Outputs:", state)
         return state, state, txt + ' ' + image_filename + ' '
 
+    def run_audio(self, audio, state, txt):
+        print("===============Running run_audio =============")
+        print("Inputs:", audio, state)
+        print("======>Previous memory:\n %s" % self.agent.memory)
+        audio_filename = os.path.join('audio', str(uuid.uuid4())[0:8] + ".wav")
+        import shutil
+        shutil.copyfile(audio, audio_filename)
+        transcribed_text = self.whisper.transcribe(audio_filename)
+        Human_prompt = "\nHuman: provide audio named {}. The description is: {}. This information helps you to understand this audio, but you should use tools to finish following tasks, " \
+                       "rather than directly imagine from my description. If you understand, say \"Received\". \n".format(
+            audio_filename, transcribed_text)
+
+        AI_prompt = "Received.  "
+        self.agent.memory.buffer = self.agent.memory.buffer + Human_prompt + 'AI: ' + AI_prompt
+        print("======>Current memory:\n %s" % self.agent.memory)
+        state = state + [(f"![](/file={audio_filename})*{audio_filename}*", AI_prompt)]
+        print("Outputs:", state)
+        return state, audio, state, txt + ' ' + audio_filename + ' '
+
+
 
 if __name__ == '__main__':
     bot = ConversationBot()
@@ -541,6 +561,7 @@ if __name__ == '__main__':
             with gr.Column(scale=0.15, min_width=0):
                 audio = gr.Audio(type="filepath")
 
+        audio.upload(bot.run_audio, [audio, state, txt], [chatbot, audio, state, txt])
         txt.submit(bot.run_text, [txt, state, audio], [chatbot, state, audio])
         txt.submit(lambda: "", None, txt)
         btn.upload(bot.run_image, [btn, state, txt], [chatbot, state, txt])
