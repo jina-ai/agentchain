@@ -28,3 +28,4 @@ diffusers
 gradio
 openai
 accelerate
+openai-whisper==20230308
