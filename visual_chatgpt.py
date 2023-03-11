@@ -353,14 +353,15 @@ class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
         self.llm = OpenAI(temperature=0)
-        self.i2t = ImageCaptioning(device="cuda:4")
-        self.t2i = T2I(device="cuda:1")
+        self.i2t = ImageCaptioning(device="cuda:1") # 1755
+        self.t2i = T2I(device="cuda:1") # 6677
         self.image2pose = image2pose()
-        self.pose2image = pose2image(device="cuda:3")
-        self.BLIPVQA = BLIPVQA(device="cuda:4")
+        self.pose2image = pose2image(device="cuda:1") # 6681
+        self.BLIPVQA = BLIPVQA(device="cuda:1") # 2709
         self.image2seg = image2seg()
-        self.seg2image = seg2image(device="cuda:7")
-        self.pix2pix = Pix2Pix(device="cuda:3")
+        self.seg2image = seg2image(device="cuda:1") # 5540
+        ## up until now, comsuming  23362 MB on GPU
+        self.pix2pix = Pix2Pix(device="cuda:2") # 2795
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
             Tool(name="Get Photo Description", func=self.i2t.inference,
@@ -382,9 +383,6 @@ class ConversationBot:
             Tool(name="Generate Image Condition On Segmentations", func=self.seg2image.inference,
                  description="useful when you want to generate a new real image from both the user desciption and segmentations. like: generate a real image of a object or something from this segmentation image, or generate a new real image of a object or something from these segmentations. "
                              "The input to this tool should be a comma seperated string of two, representing the image_path and the user description"),
-            Tool(name="Sketch Detection On Image", func=self.image2scribble.inference,
-                 description="useful when you want to generate a scribble of the image. like: generate a scribble of this image, or generate a sketch from this image, detect the sketch from this image. "
-                             "The input to this tool should be a string, representing the image_path"),
             Tool(name="Pose Detection On Image", func=self.image2pose.inference,
                  description="useful when you want to detect the human pose of the image. like: generate human poses of this image, or generate a pose image from this image. "
                              "The input to this tool should be a string, representing the image_path"),
