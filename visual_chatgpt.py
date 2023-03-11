@@ -30,6 +30,7 @@ from ControlNet.cldm.ddim_hacked import DDIMSampler
 from ControlNet.annotator.util import HWC3, resize_image
 from ControlNet.annotator.openpose import OpenposeDetector
 from ControlNet.annotator.uniformer import UniformerDetector
+import whisper
 from TTS.api import TTS
 
 VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
@@ -381,6 +382,14 @@ class BLIPVQA:
         return answer
 
 
+class Whisper:
+    def __init__(self, device):
+        print("Initializing Whisper on device", device)
+        self.model = whisper.load_model("medium.en", device=device)
+
+    def transcribe(self, inputs):
+        return self.model.transcribe(inputs)['text']
+
 class coqui_tts:
 
     def __init__(self, device):
@@ -410,6 +419,8 @@ class ConversationBot:
         ## up until now, comsuming  23362 MB on GPU
         self.pix2pix = Pix2Pix(device="cuda:2") # 2795
         self.coqui_tts = coqui_tts(device=False)
+        self.whisper = Whisper(device="cuda:2")
+
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
             Tool(name="Get Photo Description", func=self.i2t.inference,
@@ -452,6 +463,9 @@ class ConversationBot:
                              "or generate a new real image of a human from this pose."
                              "The input to this tool should be a comma seperated string of two, representing the "
                              "image_path and the user description"),
+            Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
+                 description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
+                             "The input to this tool should be a string, representing the audio_path"),
             Tool(name="Generate Text From Speech", func=self.coqui_tts.gen_speech_from_text,
                  description="useful when you want to generate a speech from a text. like: generate a speech from "
                              "this text, or generate a speech from this sentence. "
@@ -459,6 +473,7 @@ class ConversationBot:
                              "speech."
                  )
         ]
+
         self.agent = initialize_agent(
             self.tools,
             self.llm,
@@ -509,6 +524,26 @@ class ConversationBot:
         print("Outputs:", state)
         return state, state, txt + ' ' + image_filename + ' '
 
+    def run_audio(self, audio, state, txt):
+        print("===============Running run_audio =============")
+        print("Inputs:", audio, state)
+        print("======>Previous memory:\n %s" % self.agent.memory)
+        audio_filename = os.path.join('audio', str(uuid.uuid4())[0:8] + ".wav")
+        import shutil
+        shutil.copyfile(audio, audio_filename)
+        transcribed_text = self.whisper.transcribe(audio_filename)
+        Human_prompt = "\nHuman: provide audio named {}. The description is: {}. This information helps you to understand this audio, but you should use tools to finish following tasks, " \
+                       "rather than directly imagine from my description. If you understand, say \"Received\". \n".format(
+            audio_filename, transcribed_text)
+
+        AI_prompt = "Received.  "
+        self.agent.memory.buffer = self.agent.memory.buffer + Human_prompt + 'AI: ' + AI_prompt
+        print("======>Current memory:\n %s" % self.agent.memory)
+        state = state + [(f"![](/file={audio_filename})*{audio_filename}*", AI_prompt)]
+        print("Outputs:", state)
+        return state, audio, state, txt + ' ' + audio_filename + ' '
+
+
 
 if __name__ == '__main__':
     bot = ConversationBot()
@@ -526,6 +561,7 @@ if __name__ == '__main__':
             with gr.Column(scale=0.15, min_width=0):
                 audio = gr.Audio(type="filepath")
 
+        audio.upload(bot.run_audio, [audio, state, txt], [chatbot, audio, state, txt])
         txt.submit(bot.run_text, [txt, state, audio], [chatbot, state, audio])
         txt.submit(lambda: "", None, txt)
         btn.upload(bot.run_image, [btn, state, txt], [chatbot, state, txt])
