@@ -4,7 +4,8 @@ import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import gradio as gr
-from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation
+from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation, \
+    AutoModelForTableQuestionAnswering
 import torch
 from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
@@ -31,6 +32,7 @@ from ControlNet.annotator.util import HWC3, resize_image
 from ControlNet.annotator.openpose import OpenposeDetector
 from ControlNet.annotator.uniformer import UniformerDetector
 from TTS.api import TTS
+import pands as pd
 
 VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
@@ -396,20 +398,63 @@ class coqui_tts:
         return filename
 
 
+class TableQA:
+
+    def __init__(self, device):
+        self.device = device
+        self.tokenizer = AutoTokenizer.from_pretrained("google/tapas-large-finetuned-wtq")
+        self.model = AutoModelForTableQuestionAnswering.from_pretrained("google/tapas-large-finetuned-wtq").to(
+            self.device)
+
+    def get_answer_from_question_and_table(self, inputs):
+        table_path = inputs.split(",")[0]
+        questions = inputs.split(",")[1:]
+        table = pd.read_csv(table_path)
+        inputs = self.tokenizer(table=table, queries=questions, padding="max_length", truncation=True,
+                                return_tensors="pt")
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+        outputs = self.model(**inputs)
+        predicted_answer_coordinates, predicted_aggregation_indices = self.tokenizer.convert_logits_to_predictions(
+            inputs, outputs.logits.detach(), outputs.logits_aggregation.detach()
+        )
+        id2aggregation = {0: "NONE", 1: "SUM", 2: "AVERAGE", 3: "COUNT"}
+        aggregation_predictions_string = [id2aggregation[x] for x in predicted_aggregation_indices]
+        answers = []
+        for coordinates in predicted_answer_coordinates:
+            if len(coordinates) == 1:
+                answers.append(table.iat[coordinates[0]])
+            else:
+                cell_values = []
+                for coordinate in coordinates:
+                    cell_values.append(table.iat[coordinate])
+                    answers.append(", ".join(cell_values))
+
+        out_str = ""
+        for query, answer, predicted_agg in zip(questions, answers, aggregation_predictions_string):
+            out_str += query + '\n'
+            if predicted_agg == "NONE":
+                out_str += answer + '\n'
+            else:
+                out_str += predicted_agg + " of " + answer + '\n'
+        return out_str
+
+
 class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
         self.llm = OpenAI(temperature=0)
-        self.i2t = ImageCaptioning(device="cuda:1") # 1755
-        self.t2i = T2I(device="cuda:1") # 6677
+        self.i2t = ImageCaptioning(device="cuda:1")  # 1755
+        self.t2i = T2I(device="cuda:1")  # 6677
         self.image2pose = image2pose()
-        self.pose2image = pose2image(device="cuda:1") # 6681
-        self.BLIPVQA = BLIPVQA(device="cuda:1") # 2709
+        self.pose2image = pose2image(device="cuda:1")  # 6681
+        self.BLIPVQA = BLIPVQA(device="cuda:1")  # 2709
         self.image2seg = image2seg()
-        self.seg2image = seg2image(device="cuda:1") # 5540
+        self.seg2image = seg2image(device="cuda:1")  # 5540
         ## up until now, comsuming  23362 MB on GPU
-        self.pix2pix = Pix2Pix(device="cuda:2") # 2795
+        self.pix2pix = Pix2Pix(device="cuda:2")  # 2795
         self.coqui_tts = coqui_tts(device=False)
+        self.tableQA = TableQA(device="cuda:2")  # 2795
+
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
             Tool(name="Get Photo Description", func=self.i2t.inference,
@@ -447,17 +492,22 @@ class ConversationBot:
                              "of this image, or generate a pose image from this image."
                              "The input to this tool should be a string, representing the image_path"),
             Tool(name="Generate Image Condition On Pose Image", func=self.pose2image.inference,
-                 description="useful when you want to generate a new real image from both the user desciption and a "
+                 description="useful when you want to generate a new real image from both the user description and a "
                              "human pose image. like: generate a real image of a human from this human pose image, "
                              "or generate a new real image of a human from this pose."
-                             "The input to this tool should be a comma seperated string of two, representing the "
+                             "The input to this tool should be a comma separated string of two, representing the "
                              "image_path and the user description"),
             Tool(name="Generate Text From Speech", func=self.coqui_tts.gen_speech_from_text,
                  description="useful when you want to generate a speech from a text. like: generate a speech from "
                              "this text, or generate a speech from this sentence. "
                              "The input to this tool should be a string, representing the text to be converted to "
                              "speech."
-                 )
+                 ),
+            Tool(name="Answer Question About The table", func=self.tableQA.get_answer_from_question_and_table,
+                 description="useful when you need an answer for a question based on a table. like: what is the "
+                             "maximum of the column age, or  what is the sum of row 5 from the following table."
+                             "The input to this tool should be a comma separated string, representing the "
+                             "table_path and the questions"),
         ]
         self.agent = initialize_agent(
             self.tools,
