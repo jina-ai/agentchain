@@ -243,7 +243,8 @@ class pose2image:
         self.scale = 9.0
         self.seed = -1
         self.a_prompt = 'best quality, extremely detailed'
-        self.n_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality'
+        self.n_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, ' \
+                        'cropped, worst quality, low quality'
 
     def inference(self, inputs):
         print("===>Starting pose2image Inference")
@@ -322,7 +323,8 @@ class seg2image:
         self.scale = 9.0
         self.seed = -1
         self.a_prompt = 'best quality, extremely detailed'
-        self.n_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality'
+        self.n_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, ' \
+                        'cropped, worst quality, low quality'
 
     def inference(self, inputs):
         print("===>Starting seg2image Inference")
