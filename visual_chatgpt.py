@@ -419,7 +419,7 @@ class ConversationBot:
         ## up until now, comsuming  23362 MB on GPU
         self.pix2pix = Pix2Pix(device="cuda:2") # 2795
         self.coqui_tts = coqui_tts(device=False)
-        self.whisper = Whisper(device="cuda:0")
+        self.whisper = Whisper(device="cuda:2")
 
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
