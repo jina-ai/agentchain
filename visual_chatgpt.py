@@ -4,7 +4,8 @@ import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import gradio as gr
-from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation
+from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation, \
+    AutoModelForTableQuestionAnswering
 import torch
 from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
@@ -32,6 +33,7 @@ from ControlNet.annotator.openpose import OpenposeDetector
 from ControlNet.annotator.uniformer import UniformerDetector
 import whisper
 from TTS.api import TTS
+import pandas as pd
 
 VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
@@ -405,20 +407,37 @@ class coqui_tts:
         return filename
 
 
+class TableQA:
+
+    def __init__(self, device):
+        self.device = device
+        self.pipeline = pipeline(task="table-question-answering", model="google/tapas-large-finetuned-wtq", device=self.device)
+
+    def get_answer_from_question_and_table(self, inputs):
+        table_path = inputs.split(",")[0]
+        questions = inputs.split(",")[1:]
+        table = pd.read_csv(table_path, dtype=str)
+
+        res = self.pipeline(table=table, query=questions)
+
+        return res['answer']
+
+
 class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
         self.llm = OpenAI(temperature=0)
-        self.i2t = ImageCaptioning(device="cuda:1") # 1755
-        self.t2i = T2I(device="cuda:1") # 6677
+        self.i2t = ImageCaptioning(device="cuda:1")  # 1755
+        self.t2i = T2I(device="cuda:1")  # 6677
         self.image2pose = image2pose()
-        self.pose2image = pose2image(device="cuda:1") # 6681
-        self.BLIPVQA = BLIPVQA(device="cuda:1") # 2709
+        self.pose2image = pose2image(device="cuda:1")  # 6681
+        self.BLIPVQA = BLIPVQA(device="cuda:1")  # 2709
         self.image2seg = image2seg()
-        self.seg2image = seg2image(device="cuda:1") # 5540
+        self.seg2image = seg2image(device="cuda:1")  # 5540
         ## up until now, comsuming  23362 MB on GPU
-        self.pix2pix = Pix2Pix(device="cuda:2") # 2795
+        self.pix2pix = Pix2Pix(device="cuda:2")  # 2795
         self.coqui_tts = coqui_tts(device=False)
+        self.tableQA = TableQA(device="cuda:2")
         self.whisper = Whisper(device="cuda:2")
 
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
@@ -458,10 +477,10 @@ class ConversationBot:
                              "of this image, or generate a pose image from this image."
                              "The input to this tool should be a string, representing the image_path"),
             Tool(name="Generate Image Condition On Pose Image", func=self.pose2image.inference,
-                 description="useful when you want to generate a new real image from both the user desciption and a "
+                 description="useful when you want to generate a new real image from both the user description and a "
                              "human pose image. like: generate a real image of a human from this human pose image, "
                              "or generate a new real image of a human from this pose."
-                             "The input to this tool should be a comma seperated string of two, representing the "
+                             "The input to this tool should be a comma separated string of two, representing the "
                              "image_path and the user description"),
             Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
                  description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
@@ -471,7 +490,12 @@ class ConversationBot:
                              "this text, or generate a speech from this sentence. "
                              "The input to this tool should be a string, representing the text to be converted to "
                              "speech."
-                 )
+                 ),
+            Tool(name="Answer Question About The table", func=self.tableQA.get_answer_from_question_and_table,
+                 description="useful when you need an answer for a question based on a table. like: what is the "
+                             "maximum of the column age, or  what is the sum of row 5 from the following table."
+                             "The input to this tool should be a comma separated string, representing the "
+                             "table_path and the questions"),
         ]
 
         self.agent = initialize_agent(
@@ -543,6 +567,24 @@ class ConversationBot:
         print("Outputs:", state)
         return state, audio, state, txt + ' ' + audio_filename + ' '
 
+    # bot.run_df, [persist_df, state, txt], [chatbot, persist_df, state, txt])
+
+    def run_df(self, df, state, txt):
+        print("===============Running run_df =============")
+        print("Inputs:", df, state)
+        print("======>Previous memory:\n %s" % self.agent.memory)
+        csv_filename = os.path.join('csv', str(uuid.uuid4())[0:8] + ".csv")
+        df.to_csv(csv_filename, index=False)
+        Human_prompt = "\nHuman: provided a csv file named {}. You can specifically use the tool \"Answer Question About The table\" to understand this file. If you understand, say \"Received\". \n".format(
+            csv_filename)
+
+        AI_prompt = "Received.  "
+        self.agent.memory.buffer = self.agent.memory.buffer + Human_prompt + 'AI: ' + AI_prompt
+        print("======>Current memory:\n %s" % self.agent.memory)
+        state = state + [(f"![](/file={csv_filename})*{csv_filename}*", AI_prompt)]
+        print("Outputs:", state)
+        return state, state, txt + ' ' + csv_filename + ' '
+
 
 
 if __name__ == '__main__':
@@ -560,11 +602,17 @@ if __name__ == '__main__':
                 btn = gr.UploadButton("Upload", file_types=["image"])
             with gr.Column(scale=0.15, min_width=0):
                 audio = gr.Audio(type="filepath")
+        with gr.Row():
+            with gr.Column(scale=0.8, min_width=0):
+                df = gr.DataFrame(interactive=True, row_count=1, col_count=1)
+            with gr.Column(scale=0.8, min_width=0):
+                persist_df = gr.Button("Persist the dataframe")
 
         audio.upload(bot.run_audio, [audio, state, txt], [chatbot, audio, state, txt])
         txt.submit(bot.run_text, [txt, state, audio], [chatbot, state, audio])
         txt.submit(lambda: "", None, txt)
         btn.upload(bot.run_image, [btn, state, txt], [chatbot, state, txt])
+        persist_df.click(bot.run_df, [df, state, txt], [chatbot, state, txt])
         clear.click(bot.memory.clear)
         clear.click(lambda: [], None, chatbot)
         clear.click(lambda: [], None, state)
