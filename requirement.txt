@@ -28,3 +28,4 @@ diffusers
 gradio
 openai
 accelerate
+TTS
