@@ -33,3 +33,4 @@ TTS
 pandas
 twilio
 boto3
+google-search-results
