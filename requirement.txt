@@ -31,3 +31,6 @@ accelerate
 openai-whisper==20230308
 TTS
 pandas
+twilio
+boto3
+google-search-results
