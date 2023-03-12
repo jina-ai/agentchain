@@ -423,6 +423,50 @@ class TableQA:
         return res['answer']
 
 
+class TwilioCaller:
+    def parse_input(self, inputs):
+        try:
+            if 'and' in inputs:
+                text: str = inputs.split("and")[0]
+                phone_number = inputs.split("and")[1]
+            elif ',' in inputs:
+                text: str = inputs.split(",")[0]
+                phone_number = inputs.split(",")[1]
+            else:
+                raise Exception('Could not make the call, the input is not well formatted. Must be a comma separated string')
+        except:
+            raise Exception('Could not parse your input. Must be a comma separated string')
+        text = text.replace('"', '').strip(' ')
+        phone_number = phone_number.replace('"', '').strip(' ')
+        if not re.match('\+[0-9]+', text) and not re.match('\+[0-9]+', phone_number):
+            raise Exception('Could not make the call, no phone number provided')
+        if re.match('\+[0-9]+', text) and not re.match('\+[0-9]+', phone_number):
+            text, phone_number = phone_number, text
+        return text, phone_number
+
+    def call_with_text(self, inputs):
+        import twilio
+        try:
+            text, phone_number = self.parse_input(inputs)
+        except Exception as e:
+            return str(e)
+        from twilio_lib import call_with_text
+        try:
+            call_with_text(text, phone_number)
+        except twilio.base.exceptions.TwilioRestException:
+            return 'Internal error, could not submit the call.'
+
+        return 'Call submitted, it should be received soon'
+
+    def call_with_audio(self, inputs):
+        audio_filename = inputs.split(",")[0]
+        phone_number = inputs.split(",")[1:]
+        from twilio_lib import call_with_audio
+        call_with_audio(audio_filename, phone_number)
+
+        return 'Call submitted, it should be received soon'
+
+
 class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
@@ -439,6 +483,7 @@ class ConversationBot:
         self.coqui_tts = coqui_tts(device=False)
         self.tableQA = TableQA(device="cuda:2")
         self.whisper = Whisper(device="cuda:2")
+        self.twilio_caller = TwilioCaller()
 
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
@@ -496,6 +541,14 @@ class ConversationBot:
                              "maximum of the column age, or  what is the sum of row 5 from the following table."
                              "The input to this tool should be a comma separated string, representing the "
                              "table_path and the questions"),
+            Tool(name="Call a phone number with text", func=self.twilio_caller.call_with_text,
+                 description="useful when you need to call a phone number with a text input. like: call +4917686490193 and"
+                             " tell him \"happy birthday\". The input to this tool should be a comma separate string "
+                             "representing the text_input and the phone_number"),
+            # Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
+            #      description="useful when you need to call a phone number with an audio file. like: call +4917686490193 and"
+            #                  " using audio file audio/smth.wav. Only use audio files mentioned by the user."
+            #                  "The input to this tool should be a comma separated string representing the audio file name and the phone_number"),
         ]
 
         self.agent = initialize_agent(
