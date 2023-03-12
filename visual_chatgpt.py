@@ -14,6 +14,8 @@ from langchain.agents.initialize import initialize_agent
 from langchain.agents.tools import Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.llms.openai import OpenAI
+from langchain.agents import load_tools
+
 import re
 import uuid
 
@@ -392,6 +394,7 @@ class Whisper:
     def transcribe(self, inputs):
         return self.model.transcribe(inputs)['text']
 
+
 class coqui_tts:
 
     def __init__(self, device):
@@ -411,7 +414,8 @@ class TableQA:
 
     def __init__(self, device):
         self.device = device
-        self.pipeline = pipeline(task="table-question-answering", model="google/tapas-large-finetuned-wtq", device=self.device)
+        self.pipeline = pipeline(task="table-question-answering", model="google/tapas-large-finetuned-wtq",
+                                 device=self.device)
 
     def get_answer_from_question_and_table(self, inputs):
         table_path = inputs.split(",")[0]
@@ -439,6 +443,7 @@ class ConversationBot:
         self.coqui_tts = coqui_tts(device=False)
         self.tableQA = TableQA(device="cuda:2")
         self.whisper = Whisper(device="cuda:2")
+        self.extra_tools = ["serpapi", "llm-math", "python_repl", "requests", "terminal"]
 
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
@@ -483,7 +488,8 @@ class ConversationBot:
                              "The input to this tool should be a comma separated string of two, representing the "
                              "image_path and the user description"),
             Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
-                 description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
+                 description="useful when you want to generate text from audio. like: generate text from this audio, "
+                             "or transcribe this audio, or listen to this audio. receives audio_path as input."
                              "The input to this tool should be a string, representing the audio_path"),
             Tool(name="Generate Text From Speech", func=self.coqui_tts.gen_speech_from_text,
                  description="useful when you want to generate a speech from a text. like: generate a speech from "
@@ -497,6 +503,8 @@ class ConversationBot:
                              "The input to this tool should be a comma separated string, representing the "
                              "table_path and the questions"),
         ]
+
+        self.tools = self.tools + load_tools(self.extra_tools, llm=self.llm)
 
         self.agent = initialize_agent(
             self.tools,
@@ -584,7 +592,6 @@ class ConversationBot:
         state = state + [(f"![](/file={csv_filename})*{csv_filename}*", AI_prompt)]
         print("Outputs:", state)
         return state, state, txt + ' ' + csv_filename + ' '
-
 
 
 if __name__ == '__main__':
