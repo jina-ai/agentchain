@@ -4,8 +4,7 @@ import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import gradio as gr
-from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation, \
-    AutoModelForTableQuestionAnswering
+from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation
 import torch
 from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
@@ -421,7 +420,7 @@ class coqui_tts:
         self.tts.tts_to_file(text=inputs, speaker=self.tts.speakers[0], language=self.tts.languages[0],
                              file_path=filename)
 
-        return filename
+        return "Audio generated in " + filename
 
 
 class TableQA:
@@ -550,9 +549,9 @@ class ConversationBot:
                  description="useful when you want to generate text from audio. like: generate text from this audio, "
                              "or transcribe this audio, or listen to this audio. receives audio_path as input."
                              "The input to this tool should be a string, representing the audio_path"),
-            Tool(name="Generate Text From Speech", func=self.coqui_tts.gen_speech_from_text,
+            Tool(name="Generate Speech From Text", func=self.coqui_tts.gen_speech_from_text,
                  description="useful when you want to generate a speech from a text. like: generate a speech from "
-                             "this text, or generate a speech from this sentence. "
+                             "this text, or say this text in audio. "
                              "The input to this tool should be a string, representing the text to be converted to "
                              "speech."
                  ),
@@ -644,7 +643,6 @@ class ConversationBot:
         print("Outputs:", state)
         return state, audio, state, txt + ' ' + audio_filename + ' '
 
-    # bot.run_df, [persist_df, state, txt], [chatbot, persist_df, state, txt])
 
     def run_df(self, df, state, txt):
         print("===============Running run_df =============")
@@ -669,20 +667,26 @@ if __name__ == '__main__':
         chatbot = gr.Chatbot(elem_id="chatbot", label="HiveMind")
         state = gr.State([])
         with gr.Row():
-            with gr.Column(scale=0.7):
-                txt = gr.Textbox(show_label=False, placeholder="Enter text and press enter, or upload an image").style(
+            with gr.Column(scale=0.8):
+                txt = gr.Textbox(placeholder="Enter text and press enter", label='Instruct with text').style(
                     container=False)
-            with gr.Column(scale=0.15, min_width=0):
-                clear = gr.Button("Clear")
-            with gr.Column(scale=0.15, min_width=0):
-                btn = gr.UploadButton("Upload", file_types=["image"])
-            with gr.Column(scale=0.15, min_width=0):
-                audio = gr.Audio(type="filepath")
+            with gr.Column(scale=0.2, min_width=0):
+                btn = gr.UploadButton("Upload Image", file_types=["image"])
         with gr.Row():
-            with gr.Column(scale=0.8, min_width=0):
-                df = gr.DataFrame(interactive=True, row_count=1, col_count=1)
-            with gr.Column(scale=0.8, min_width=0):
-                persist_df = gr.Button("Persist the dataframe")
+            with gr.Column(scale=0.5, min_width=0):
+                with gr.Row():
+                    with gr.Column(scale=0.5, min_width=0):
+                        input_audio = gr.Audio(source="microphone", label='Instruct with Audio')
+                    with gr.Column(scale=0.5, min_width=0):
+                        audio = gr.Audio(type="filepath", label='Audio output', interactive=False)
+                with gr.Row():
+                    clear = gr.Button("Clear Chat History")
+            with gr.Column(scale=0.5, min_width=0):
+                with gr.Row():
+                    df = gr.DataFrame(interactive=True, row_count=1, col_count=1, headers=['Column1'], label="Give a Dataframe as input")
+                with gr.Row():
+                    with gr.Column(scale=0.8, min_width=0):
+                        persist_df = gr.Button("Upload the dataframe")
 
         audio.upload(bot.run_audio, [audio, state, txt], [chatbot, audio, state, txt])
         txt.submit(bot.run_text, [txt, state, audio], [chatbot, state, audio])
