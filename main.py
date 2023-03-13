@@ -13,6 +13,8 @@ from langchain.agents.initialize import initialize_agent
 from langchain.agents.tools import Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.llms.openai import OpenAI
+from langchain.agents import load_tools
+
 import re
 import uuid
 
@@ -34,21 +36,35 @@ import whisper
 from TTS.api import TTS
 import pandas as pd
 
-VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+HIVEMIND_PREFIX = """HiveMind is designed to be able to assist with a wide range of text, visual and audio 
+related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of 
+topics. HiveMind is able to generate human-like text based on the input it receives, allowing it to engage in 
+natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
-Visual ChatGPT is able to process and understand large amounts of text and images. As a language model, Visual ChatGPT can not directly read images, but it has a list of tools to finish different visual tasks. Each image will have a file name formed as "image/xxx.png", and Visual ChatGPT can invoke different tools to indirectly understand pictures. When talking about images, Visual ChatGPT is very strict to the file name and will never fabricate nonexistent files. When using tools to generate new image files, Visual ChatGPT is also known that the image may not be the same as the user's demand, and will use other visual question answering tools or description tools to observe the real image. Visual ChatGPT is able to use tools in a sequence, and is loyal to the tool observation outputs rather than faking the image content and image file name. It will remember to provide the file name from the last tool observation, if a new image is generated.
+HiveMind is able to process and understand large amounts of text, images and audios. As a language model, 
+HiveMind can not directly read images or audio, but it has a list of tools to finish different visual, text, audio, 
+math and reasoning tasks. Each image will have a file name formed as "image/xxx.png", and HiveMind can invoke 
+different tools to indirectly understand pictures. Each audio will have a file name formed as "audio/xxx.wav", 
+and HiveMind can invoke different tools to indirectly understand audio. When talking about audio, HiveMind is very 
+strict to the file name and will never fabricate nonexistent files. When using tools to generate new image files, 
+HiveMind is also known that the image may not be the same as the user's demand, and will use other visual 
+question answering tools or description tools to observe the real image. HiveMind is able to use tools in a sequence, 
+and is loyal to the tool observation outputs rather than faking the image content and image file name. It will 
+remember to provide the file name from the last tool observation, if a new image is generated.
 
-Human may provide new figures to Visual ChatGPT with a description. The description helps Visual ChatGPT to understand this image, but Visual ChatGPT should use tools to finish following tasks, rather than directly imagine from the description.
+Human may provide new figures to HiveMind with a description. The description helps HiveMind to understand this 
+image, but HiveMind should use tools to finish following tasks, rather than directly imagine from the description.
 
-Overall, Visual ChatGPT is a powerful visual dialogue assistant tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. 
+Overall, HiveMind is a powerful visual dialogue assistant tool that can help with a wide range of tasks and provide 
+valuable insights and information on a wide range of topics.
 
 
 TOOLS:
 ------
 
-Visual ChatGPT  has access to the following tools:"""
+HiveMind  has access to the following tools:"""
 
-VISUAL_CHATGPT_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
+HIVEMIND_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
 
 ```
 Thought: Do I need to use a tool? Yes
@@ -65,8 +81,8 @@ Thought: Do I need to use a tool? No
 ```
 """
 
-VISUAL_CHATGPT_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does not exist.
-You will remember to provide the image file name loyally if it's provided in the last tool observation.
+HIVEMIND_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does 
+not exist. You will remember to provide the image file name loyally if it's provided in the last tool observation.
 
 Begin!
 
@@ -74,9 +90,9 @@ Previous conversation history:
 {chat_history}
 
 New input: {input}
-Since Visual ChatGPT is a text language model, Visual ChatGPT must use tools to observe images rather than imagination.
-The thoughts and observations are only visible for Visual ChatGPT, Visual ChatGPT should remember to repeat important information in the final response for Human. 
-Thought: Do I need to use a tool? {agent_scratchpad}"""
+Since HiveMind is a text language model, HiveMind must use tools to observe images or audio rather than 
+imagination. The thoughts and observations are only visible for HiveMind, HiveMind should remember to repeat 
+important information in the final response for Human. Thought: Do I need to use a tool? {agent_scratchpad}"""
 
 
 def cut_dialogue_history(history_memory, keep_last_n_words=500):
@@ -391,6 +407,7 @@ class Whisper:
     def transcribe(self, inputs):
         return self.model.transcribe(inputs)['text']
 
+
 class coqui_tts:
 
     def __init__(self, device):
@@ -410,7 +427,8 @@ class TableQA:
 
     def __init__(self, device):
         self.device = device
-        self.pipeline = pipeline(task="table-question-answering", model="google/tapas-large-finetuned-wtq", device=self.device)
+        self.pipeline = pipeline(task="table-question-answering", model="google/tapas-large-finetuned-wtq",
+                                 device=self.device)
 
     def get_answer_from_question_and_table(self, inputs):
         table_path = inputs.split(",")[0]
@@ -468,7 +486,7 @@ class TwilioCaller:
 
 class ConversationBot:
     def __init__(self):
-        print("Initializing VisualChatGPT")
+        print("Initializing HiveMind")
         self.llm = OpenAI(temperature=0)
         self.i2t = ImageCaptioning(device="cuda:1")  # 1755
         self.t2i = T2I(device="cuda:1")  # 6677
@@ -483,6 +501,7 @@ class ConversationBot:
         self.tableQA = TableQA(device="cuda:2")
         self.whisper = Whisper(device="cuda:2")
         self.twilio_caller = TwilioCaller()
+        self.extra_tools = ["serpapi", "llm-math", "python_repl", "requests", "terminal"]
 
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
@@ -527,7 +546,8 @@ class ConversationBot:
                              "The input to this tool should be a comma separated string of two, representing the "
                              "image_path and the user description"),
             Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
-                 description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
+                 description="useful when you want to generate text from audio. like: generate text from this audio, "
+                             "or transcribe this audio, or listen to this audio. receives audio_path as input."
                              "The input to this tool should be a string, representing the audio_path"),
             Tool(name="Generate Speech From Text", func=self.coqui_tts.gen_speech_from_text,
                  description="useful when you want to generate a speech from a text. like: generate a speech from "
@@ -544,11 +564,13 @@ class ConversationBot:
                  description="useful when you need to call a phone number with a text input. like: call +4917686490193 and"
                              " tell him \"happy birthday\". The input to this tool should be a comma separate string "
                              "representing the text_input and the phone_number"),
-            Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
-                 description="useful when you need to call a phone number with an audio file. like: call +4917686490193 and"
-                             " using audio file audio/smth.wav. Only use audio files mentioned by the user."
-                             "The input to this tool should be a comma separated string representing the audio file name and the phone_number"),
+            # Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
+            #      description="useful when you need to call a phone number with an audio file. like: call +4917686490193 and"
+            #                  " using audio file audio/smth.wav. Only use audio files mentioned by the user."
+            #                  "The input to this tool should be a comma separated string representing the audio file name and the phone_number"),
         ]
+
+        self.tools = self.tools + load_tools(self.extra_tools, llm=self.llm)
 
         self.agent = initialize_agent(
             self.tools,
@@ -557,8 +579,8 @@ class ConversationBot:
             verbose=True,
             memory=self.memory,
             return_intermediate_steps=True,
-            agent_kwargs={'prefix': VISUAL_CHATGPT_PREFIX, 'format_instructions': VISUAL_CHATGPT_FORMAT_INSTRUCTIONS,
-                          'suffix': VISUAL_CHATGPT_SUFFIX}, )
+            agent_kwargs={'prefix': HIVEMIND_PREFIX, 'format_instructions': HIVEMIND_FORMAT_INSTRUCTIONS,
+                          'suffix': HIVEMIND_SUFFIX}, )
 
     def run_text(self, text, state, audio):
         print("===============Running run_text =============")
@@ -590,7 +612,8 @@ class ConversationBot:
         img.save(image_filename, "PNG")
         print(f"Resize image form {width}x{height} to {width_new}x{height_new}")
         description = self.i2t.inference(image_filename)
-        Human_prompt = "\nHuman: provide a figure named {}. The description is: {}. This information helps you to understand this image, but you should use tools to finish following tasks, " \
+        Human_prompt = "\nHuman: provide a figure named {}. The description is: {}. This information helps you to " \
+                       "understand this image, but you should use tools to finish following tasks, " \
                        "rather than directly imagine from my description. If you understand, say \"Received\". \n".format(
             image_filename, description)
         AI_prompt = "Received.  "
@@ -608,7 +631,8 @@ class ConversationBot:
         import shutil
         shutil.copyfile(audio, audio_filename)
         transcribed_text = self.whisper.transcribe(audio_filename)
-        Human_prompt = "\nHuman: provide audio named {}. The description is: {}. This information helps you to understand this audio, but you should use tools to finish following tasks, " \
+        Human_prompt = "\nHuman: provide audio named {}. The description is: {}. This information helps you to " \
+                       "understand this audio, but you should use tools to finish following tasks, " \
                        "rather than directly imagine from my description. If you understand, say \"Received\". \n".format(
             audio_filename, transcribed_text)
 
@@ -637,11 +661,10 @@ class ConversationBot:
         return state, state, txt + ' ' + csv_filename + ' '
 
 
-
 if __name__ == '__main__':
     bot = ConversationBot()
     with gr.Blocks(css="#chatbot .overflow-y-auto{height:500px}") as demo:
-        chatbot = gr.Chatbot(elem_id="chatbot", label="Chat History")
+        chatbot = gr.Chatbot(elem_id="chatbot", label="HiveMind")
         state = gr.State([])
         with gr.Row():
             with gr.Column(scale=0.8):

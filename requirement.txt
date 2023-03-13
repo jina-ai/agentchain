@@ -29,7 +29,8 @@ gradio
 openai
 accelerate
 openai-whisper==20230308
-TTS
+TTS==0.11.1
 pandas
 twilio
 boto3
+google-search-results
