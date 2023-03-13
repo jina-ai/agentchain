@@ -570,7 +570,7 @@ class ConversationBot:
                              " tell him \"happy birthday\". The input to this tool should be a comma separate string "
                              "representing the text_input and the phone_number"),
             # Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
-            #      description="useful when you need to call a phone number with an audio file. like: call +4917686490193 and"
+            #      description="useful when you need to call a phone number with an audio file. like: call +4917424393190 and"
             #                  " using audio file audio/smth.wav. Only use audio files mentioned by the user."
             #                  "The input to this tool should be a comma separated string representing the audio file name and the phone_number"),
         ]
