@@ -37,21 +37,35 @@ import whisper
 from TTS.api import TTS
 import pandas as pd
 
-VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+HIVEMIND_PREFIX = """HiveMind is designed to be able to assist with a wide range of text, visual and audio 
+related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of 
+topics. HiveMind is able to generate human-like text based on the input it receives, allowing it to engage in 
+natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
-Visual ChatGPT is able to process and understand large amounts of text and images. As a language model, Visual ChatGPT can not directly read images, but it has a list of tools to finish different visual tasks. Each image will have a file name formed as "image/xxx.png", and Visual ChatGPT can invoke different tools to indirectly understand pictures. When talking about images, Visual ChatGPT is very strict to the file name and will never fabricate nonexistent files. When using tools to generate new image files, Visual ChatGPT is also known that the image may not be the same as the user's demand, and will use other visual question answering tools or description tools to observe the real image. Visual ChatGPT is able to use tools in a sequence, and is loyal to the tool observation outputs rather than faking the image content and image file name. It will remember to provide the file name from the last tool observation, if a new image is generated.
+HiveMind is able to process and understand large amounts of text, images and audios. As a language model, 
+HiveMind can not directly read images or audio, but it has a list of tools to finish different visual, text, audio, 
+math and reasoning tasks. Each image will have a file name formed as "image/xxx.png", and HiveMind can invoke 
+different tools to indirectly understand pictures. Each audio will have a file name formed as "audio/xxx.wav", 
+and HiveMind can invoke different tools to indirectly understand audio. When talking about audio, HiveMind is very 
+strict to the file name and will never fabricate nonexistent files. When using tools to generate new image files, 
+HiveMind is also known that the image may not be the same as the user's demand, and will use other visual 
+question answering tools or description tools to observe the real image. HiveMind is able to use tools in a sequence, 
+and is loyal to the tool observation outputs rather than faking the image content and image file name. It will 
+remember to provide the file name from the last tool observation, if a new image is generated.
 
-Human may provide new figures to Visual ChatGPT with a description. The description helps Visual ChatGPT to understand this image, but Visual ChatGPT should use tools to finish following tasks, rather than directly imagine from the description.
+Human may provide new figures to HiveMind with a description. The description helps HiveMind to understand this 
+image, but HiveMind should use tools to finish following tasks, rather than directly imagine from the description.
 
-Overall, Visual ChatGPT is a powerful visual dialogue assistant tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. 
+Overall, HiveMind is a powerful visual dialogue assistant tool that can help with a wide range of tasks and provide 
+valuable insights and information on a wide range of topics.
 
 
 TOOLS:
 ------
 
-Visual ChatGPT  has access to the following tools:"""
+HiveMind  has access to the following tools:"""
 
-VISUAL_CHATGPT_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
+HIVEMIND_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
 
 ```
 Thought: Do I need to use a tool? Yes
@@ -68,18 +82,17 @@ Thought: Do I need to use a tool? No
 ```
 """
 
-VISUAL_CHATGPT_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does not exist.
-You will remember to provide the image file name loyally if it's provided in the last tool observation.
+HIVEMIND_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does 
+not exist. You will remember to provide the image file name loyally if it's provided in the last tool observation.
 
 Begin!
 
 Previous conversation history:
 {chat_history}
 
-New input: {input}
-Since Visual ChatGPT is a text language model, Visual ChatGPT must use tools to observe images rather than imagination.
-The thoughts and observations are only visible for Visual ChatGPT, Visual ChatGPT should remember to repeat important information in the final response for Human. 
-Thought: Do I need to use a tool? {agent_scratchpad}"""
+New input: {input} Since HiveMind is a text language model, HiveMind must use tools to observe images or audio rather than 
+imagination. The thoughts and observations are only visible for HiveMind, HiveMind should remember to repeat 
+important information in the final response for Human. Thought: Do I need to use a tool? {agent_scratchpad}"""
 
 
 def cut_dialogue_history(history_memory, keep_last_n_words=500):
@@ -473,7 +486,7 @@ class TwilioCaller:
 
 class ConversationBot:
     def __init__(self):
-        print("Initializing VisualChatGPT")
+        print("Initializing HiveMind")
         self.llm = OpenAI(temperature=0)
         self.i2t = ImageCaptioning(device="cuda:1")  # 1755
         self.t2i = T2I(device="cuda:1")  # 6677
@@ -566,8 +579,8 @@ class ConversationBot:
             verbose=True,
             memory=self.memory,
             return_intermediate_steps=True,
-            agent_kwargs={'prefix': VISUAL_CHATGPT_PREFIX, 'format_instructions': VISUAL_CHATGPT_FORMAT_INSTRUCTIONS,
-                          'suffix': VISUAL_CHATGPT_SUFFIX}, )
+            agent_kwargs={'prefix': HIVEMIND_PREFIX, 'format_instructions': HIVEMIND_FORMAT_INSTRUCTIONS,
+                          'suffix': HIVEMIND_SUFFIX}, )
 
     def run_text(self, text, state, audio):
         print("===============Running run_text =============")
@@ -599,7 +612,8 @@ class ConversationBot:
         img.save(image_filename, "PNG")
         print(f"Resize image form {width}x{height} to {width_new}x{height_new}")
         description = self.i2t.inference(image_filename)
-        Human_prompt = "\nHuman: provide a figure named {}. The description is: {}. This information helps you to understand this image, but you should use tools to finish following tasks, " \
+        Human_prompt = "\nHuman: provide a figure named {}. The description is: {}. This information helps you to " \
+                       "understand this image, but you should use tools to finish following tasks, " \
                        "rather than directly imagine from my description. If you understand, say \"Received\". \n".format(
             image_filename, description)
         AI_prompt = "Received.  "
@@ -617,7 +631,8 @@ class ConversationBot:
         import shutil
         shutil.copyfile(audio, audio_filename)
         transcribed_text = self.whisper.transcribe(audio_filename)
-        Human_prompt = "\nHuman: provide audio named {}. The description is: {}. This information helps you to understand this audio, but you should use tools to finish following tasks, " \
+        Human_prompt = "\nHuman: provide audio named {}. The description is: {}. This information helps you to " \
+                       "understand this audio, but you should use tools to finish following tasks, " \
                        "rather than directly imagine from my description. If you understand, say \"Received\". \n".format(
             audio_filename, transcribed_text)
 
@@ -650,7 +665,7 @@ class ConversationBot:
 if __name__ == '__main__':
     bot = ConversationBot()
     with gr.Blocks(css="#chatbot .overflow-y-auto{height:500px}") as demo:
-        chatbot = gr.Chatbot(elem_id="chatbot", label="Visual ChatGPT")
+        chatbot = gr.Chatbot(elem_id="chatbot", label="HiveMind")
         state = gr.State([])
         with gr.Row():
             with gr.Column(scale=0.7):
