@@ -1,6 +1,16 @@
 # GodLLM 
 
+# Introduction
 Achieving AGI through God-slave combined models
+
+# Showcase
+
+
+# Features
+
+# Architecture Graph
+
+# Get started
 
 
 ## Acknowledgement
