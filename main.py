@@ -585,7 +585,7 @@ class ConversationBot:
             agent_kwargs={'prefix': AGENT_CHAIN_PREFIX, 'format_instructions': AGENT_CHAIN_FORMAT_INSTRUCTIONS,
                           'suffix': AGENT_CHAIN_SUFFIX}, )
 
-    def run_text(self, text, state, audio):
+    def run_text(self, text, state):
         print("===============Running run_text =============")
         print("Inputs:", text, state)
         print("======>Previous memory:\n %s" % self.agent.memory)
@@ -679,9 +679,9 @@ if __name__ == '__main__':
             with gr.Column(scale=0.5, min_width=0):
                 with gr.Row():
                     with gr.Column(scale=0.5, min_width=0):
-                        input_audio = gr.Audio(source="microphone", label='Instruct with Audio')
+                        input_audio = gr.Audio(source="upload", type="filepath", label="Upload Audio Input")
                     with gr.Column(scale=0.5, min_width=0):
-                        audio = gr.Audio(type="filepath", label='Audio output', interactive=False)
+                        output_audio = gr.Audio(type="filepath", label='Audio output', interactive=False)
                 with gr.Row():
                     clear = gr.Button("Clear Chat History")
             with gr.Column(scale=0.5, min_width=0):
@@ -691,8 +691,9 @@ if __name__ == '__main__':
                     with gr.Column(scale=0.8, min_width=0):
                         persist_df = gr.Button("Upload the dataframe")
 
-        audio.upload(bot.run_audio, [audio, state, txt], [chatbot, audio, state, txt])
-        txt.submit(bot.run_text, [txt, state, audio], [chatbot, state, audio])
+        input_audio.upload(bot.run_audio, [input_audio, state, txt], [chatbot, output_audio, state, txt])
+        # audio.upload(bot.run_audio, [audio, state, txt], [chatbot, audio, state, txt])
+        txt.submit(bot.run_text, [txt, state], [chatbot, state, output_audio])
         txt.submit(lambda: "", None, txt)
         btn.upload(bot.run_image, [btn, state, txt], [chatbot, state, txt])
         persist_df.click(bot.run_df, [df, state, txt], [chatbot, state, txt])
@@ -700,4 +701,4 @@ if __name__ == '__main__':
         clear.click(lambda: [], None, chatbot)
         clear.click(lambda: [], None, state)
 
-        demo.launch(server_name="0.0.0.0", server_port=7860)
+        demo.launch(server_name="0.0.0.0", server_port=7861)
