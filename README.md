@@ -1,4 +1,7 @@
-# AgentChain 
+<p>
+<img src="https://github.com/jina-ai/agentchain/blob/main/agentchain-logo.png?raw=true" alt="AgentChain logo" width="250px"></a>
+</p>
+
 AgentChain uses Large Language Models (LLMs) for reasoning and orchestrating multiple LLMs or Large Models (LMs) for accomplishing sophisticated tasks. AgentChain is fully multimodal: it accepts text, image, audio, webcam, tabular data as input and output.
 
 - **🧠 Leverage Large Language Models (LLMs):** AgentChain leverages state-of-the-art Large Language Models to provide users with the ability to reason and make decisions based on natural language inputs. This feature makes AgentChain a versatile tool for a wide range of applications, such as natural language processing, sentiment analysis, and chatbots.
