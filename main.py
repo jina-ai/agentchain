@@ -566,7 +566,7 @@ class ConversationBot:
                              "The input to this tool should be a comma separated string, representing the "
                              "table_path and the questions"),
             Tool(name="Call a phone number with text", func=self.twilio_caller.call_with_text,
-                 description="useful when you need to call a phone number with a text input. like: call +4917686490193 and"
+                 description="useful when you need to call a phone number with a text input. like: call +4917424393190 and"
                              " tell him \"happy birthday\". The input to this tool should be a comma separate string "
                              "representing the text_input and the phone_number"),
             # Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
