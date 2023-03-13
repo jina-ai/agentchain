@@ -16,6 +16,8 @@ AgentChain uses Large Language Models (LLMs) for reasoning and orchestrating mul
 
 # Agents in AgentChain
 
+![](architecture.png)
+
 AgentChain is a sophisticated system that can orchestrate multiple agents to accomplish sophisticated tasks. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are the five agent groups in AgentChain:
 
 ### SearchAgents
