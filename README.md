@@ -1,12 +1,7 @@
 # AgentChain 
+AgentChain uses Large Language Models (LLMs) for reasoning and orchestrating multiple LLMs or Large Models (LMs) for accomplishing sophisticated tasks. AgentChain is fully multimodal, it accepts text, image, audio, webcam, tabular data as input and output.
 
-# Introduction
-AgentChain uses LLM as a central thinking agent to orchestrate multiple tools to achieve high level multi modal tasks. 
-
-Given a task, AgentChain will first identify the task type and then select the best tool/tools to execute the task.
-
-AgentChain is able to receive text, image or audio as input, execute intelligent tasks and return multi modal output. 
-# Showcase
+# Demo
 
 
 # Features
@@ -19,7 +14,8 @@ AgentChain is able to receive text, image or audio as input, execute intelligent
 * **Customizable**: If you need a tool you can easily configure your tool and add it to the pipeline. 
 
 
-# Architecture Graph
+# Architecture
+
 
 # Get started
 
