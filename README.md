@@ -3,6 +3,27 @@ AgentChain uses Large Language Models (LLMs) for reasoning and orchestrating mul
 
 # Demo
 
+
+# Agents in AgentChain
+
+AgentChain is a sophisticated system that can orchestrate multiple agents to accomplish sophisticated tasks. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are the five agent groups in AgentChain:
+
+### SearchAgents
+The `SearchAgents` group is responsible for gathering information from various sources, including search engines, online databases, and APIs. The agents in this group are highly skilled at retrieving and parsing data, making them essential for tasks that require extensive research and data analysis. Some examples of agents in this group include the `Google Search API`, `Bing API`, `Wikipedia API`, and `Serp`.
+
+### CommsAgents
+The `CommsAgents` group is responsible for handling communication between different parties, such as sending emails, making phone calls, or messaging via various platforms. The agents in this group are highly skilled at handling different communication channels and can integrate with a wide range of platforms. Some examples of agents in this group include `TwilloCaller`, `TwilloEmailWriter`, and `TwilloMessenger`.
+
+### ToolsAgents
+The `ToolsAgents` group is responsible for performing various computational tasks, such as performing calculations, running scripts, or executing commands. The agents in this group are highly versatile and can work with a wide range of programming languages and tools. Some examples of agents in this group include `Math`, `Python REPL`, and `Terminal`.
+
+### MultiModalAgents
+The `MultiModalAgents` group is responsible for handling input and output from various modalities, such as text, image, audio, or video. The agents in this group are highly skilled at processing and understanding different modalities, making them essential for tasks that require multimodal input or output. Some examples of agents in this group include `OpenAI Whisper`, `Blip2`, `Coqui`, `ControlNet`, and `StableDiffusion`.
+
+### ImageAgents
+The `ImageAgents` group is responsible for processing and manipulating images, such as enhancing image quality, object detection, or image recognition. The agents in this group are highly skilled at working with image data and can perform complex operations on them. Some examples of agents in this group include `Upscaler` and `YOLO`.
+
+
 # Examples
 
 ### Example 1: 🏝️📸🌅 AgentChain Image Generation System for Travel Company
