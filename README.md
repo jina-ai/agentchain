@@ -28,7 +28,9 @@ https://user-images.githubusercontent.com/2041322/224823758-75be4ac9-6572-4d77-9
 
 AgentChain demo 3: question-answering on tabular data and making a phone call. A screenshot of the AgentChain interface shows a table of data with a question being asked and the resulting answer displayed, followed by a phone call being made using the `CommsAgent`.
 
-https://user-images.githubusercontent.com/2041322/224827070-54c6358c-d2c8-4e8a-add6-4c0cbf0da7d0.mp4
+
+
+https://user-images.githubusercontent.com/2041322/224829592-b37d04fc-8c86-4fcf-ab0c-a9001c7cc4e7.mp4
 
 
 
