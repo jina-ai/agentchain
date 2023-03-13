@@ -1,6 +1,12 @@
 # AgentChain 
 AgentChain uses Large Language Models (LLMs) for reasoning and orchestrating multiple LLMs or Large Models (LMs) for accomplishing sophisticated tasks. AgentChain is fully multimodal: it accepts text, image, audio, webcam, tabular data as input and output.
 
+- **Leverage Large Language Models (LLMs):** AgentChain leverages state-of-the-art Large Language Models to provide users with the ability to reason and make decisions based on natural language inputs. This feature makes AgentChain a versatile tool for a wide range of applications, such as natural language processing, sentiment analysis, and chatbots.
+- **Fully Multimodal:** AgentChain is fully multimodal, accepting input and output from various modalities, such as text, image, audio, or video. This feature makes AgentChain a versatile tool for a wide range of applications, such as computer vision, speech recognition, and multimodal fusion.
+- **Orchestrate Multiple Agents:** AgentChain can orchestrate multiple agents to perform complex tasks, making it a powerful tool for projects that require extensive research, data analysis, or computation. This feature makes AgentChain a versatile tool for a wide range of applications, such as e-commerce, finance, healthcare, and more.
+- **Customizable for Specific Project Requirements:** AgentChain can be customized to fit specific project requirements, making it a versatile tool for a wide range of applications. The system can work with different programming languages, APIs, and platforms, providing maximum flexibility and
+
+
 # Demo
 
 
@@ -64,20 +70,6 @@ Here is how AgentChain can help by chaining different agents together:
 4. Use `MultiModalAgent` (`ControlNet`) to generate personalized recommendations for diet, exercise, and medication, taking into account the seniors' health goals and preferences.
 5. Use `CommsAgent` (`TwilloCaller`) to make reminders and provide alerts to help seniors stay on track with their health goals, improving their quality of life and reducing the need for emergency care.
 
-
-
-
-# Features
-
-* **Multimodal input**: AgentChain allows users to input data in a variety of formats, including images, audio, text, and even tables. This makes it easy to work with a wide range of data types and sources.
-* **Multimodal Output**: AgentChain is capable of delivering results in a variety of formats as well, including audio, text, and image. This means users can choose the format that works best for their needs and preferences.
-* **Multi-tasking**: AgentChain is designed to execute a wide range of tasks based on the input it receives. This includes everything from image recognition and text analysis to data processing and more.
-* **Real-time internet search**: AgentChain provides access to real-time internet search capabilities, allowing users to quickly find and retrieve relevant information from the web. This can be especially useful for research and other knowledge-based tasks.
-* **Access to multiple useful tools**: AgentChain has access to multiple tools such as Python Repl, Terminal and Math modules to create sophisticated answers and verify code.
-* **Customizable**: If you need a tool you can easily configure your tool and add it to the pipeline. 
-
-
-# Architecture
 
 
 # Get started
