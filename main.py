@@ -451,7 +451,9 @@ class TwilioCaller:
                 phone_number = inputs.split("and")[1]
             elif ',' in inputs:
                 text: str = inputs.split(",")[0]
-                phone_number = inputs.split(",")[1]
+                phone_number = inputs.split(",")[1:]
+                if isinstance(phone_number, list):
+                    phone_number = ",".join(phone_number)
             else:
                 raise Exception('Could not make the call, the input is not well formatted. Must be a comma separated string')
         except:
@@ -596,6 +598,8 @@ class ConversationBot:
         audio_files = re.findall('(audio/\S*wav)', response)
         if len(audio_files) > 0:
             audio = audio_files[0]
+        else:
+            audio = None
         state = state + [(text, response)]
         print("Outputs:", state)
         return state, state, audio
