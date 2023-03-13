@@ -90,7 +90,8 @@ Begin!
 Previous conversation history:
 {chat_history}
 
-New input: {input} Since HiveMind is a text language model, HiveMind must use tools to observe images or audio rather than 
+New input: {input}
+Since HiveMind is a text language model, HiveMind must use tools to observe images or audio rather than 
 imagination. The thoughts and observations are only visible for HiveMind, HiveMind should remember to repeat 
 important information in the final response for Human. Thought: Do I need to use a tool? {agent_scratchpad}"""
 
