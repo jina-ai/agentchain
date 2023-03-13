@@ -4,8 +4,7 @@ import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import gradio as gr
-from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation, \
-    AutoModelForTableQuestionAnswering
+from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation
 import torch
 from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
@@ -404,7 +403,7 @@ class coqui_tts:
         self.tts.tts_to_file(text=inputs, speaker=self.tts.speakers[0], language=self.tts.languages[0],
                              file_path=filename)
 
-        return filename
+        return "Audio generated in " + filename
 
 
 class TableQA:
@@ -471,84 +470,84 @@ class ConversationBot:
     def __init__(self):
         print("Initializing VisualChatGPT")
         self.llm = OpenAI(temperature=0)
-        # self.i2t = ImageCaptioning(device="cuda:1")  # 1755
-        # self.t2i = T2I(device="cuda:1")  # 6677
-        # self.image2pose = image2pose()
-        # self.pose2image = pose2image(device="cuda:1")  # 6681
-        # self.BLIPVQA = BLIPVQA(device="cuda:1")  # 2709
-        # self.image2seg = image2seg()
-        # self.seg2image = seg2image(device="cuda:1")  # 5540
-        # ## up until now, comsuming  23362 MB on GPU
-        # self.pix2pix = Pix2Pix(device="cuda:2")  # 2795
-        # self.coqui_tts = coqui_tts(device=False)
-        # self.tableQA = TableQA(device="cuda:2")
-        # self.whisper = Whisper(device="cuda:2")
-        # self.twilio_caller = TwilioCaller()
+        self.i2t = ImageCaptioning(device="cuda:1")  # 1755
+        self.t2i = T2I(device="cuda:1")  # 6677
+        self.image2pose = image2pose()
+        self.pose2image = pose2image(device="cuda:1")  # 6681
+        self.BLIPVQA = BLIPVQA(device="cuda:1")  # 2709
+        self.image2seg = image2seg()
+        self.seg2image = seg2image(device="cuda:1")  # 5540
+        ## up until now, comsuming  23362 MB on GPU
+        self.pix2pix = Pix2Pix(device="cuda:2")  # 2795
+        self.coqui_tts = coqui_tts(device=False)
+        self.tableQA = TableQA(device="cuda:2")
+        self.whisper = Whisper(device="cuda:2")
+        self.twilio_caller = TwilioCaller()
 
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools = [
-            # Tool(name="Get Photo Description", func=self.i2t.inference,
-            #      description="useful when you want to know what is inside the photo. receives image_path as input. "
-            #                  "The input to this tool should be a string, representing the image_path. "),
-            # Tool(name="Generate Image From User Input Text", func=self.t2i.inference,
-            #      description="useful when you want to generate an image from a user input text and save it to a file. "
-            #                  "like: generate an image of an object or something, or generate an image that includes "
-            #                  "some objects."
-            #                  "The input to this tool should be a string, representing the text used to generate image. "),
-            #
-            # Tool(name="Instruct Image Using Text", func=self.pix2pix.inference,
-            #      description="useful when you want to the style of the image to be like the text. like: make it look "
-            #                  "like a painting. or make it like a robot."
-            #                  "The input to this tool should be a comma separated string of two, representing the "
-            #                  "image_path and the text. "),
-            # Tool(name="Answer Question About The Image", func=self.BLIPVQA.get_answer_from_question_and_image,
-            #      description="useful when you need an answer for a question based on an image. like: what is the "
-            #                  "background color of the last image, how many cats in this figure, what is in this figure."
-            #                  "The input to this tool should be a comma separated string of two, representing the "
-            #                  "image_path and the question"),
-            # Tool(name="Segmentation On Image", func=self.image2seg.inference,
-            #      description="useful when you want to detect segmentations of the image. like: segment this image, "
-            #                  "or generate segmentations on this image, or perform segmentation on this image."
-            #                  "The input to this tool should be a string, representing the image_path"),
-            # Tool(name="Generate Image Condition On Segmentations", func=self.seg2image.inference,
-            #      description="useful when you want to generate a new real image from both the user description and "
-            #                  "segmentations. like: generate a real image of a object or something from this "
-            #                  "segmentation image, or generate a new real image of a object or something from these "
-            #                  "segmentations."
-            #                  "The input to this tool should be a comma separated string of two, representing the "
-            #                  "image_path and the user description"),
-            # Tool(name="Pose Detection On Image", func=self.image2pose.inference,
-            #      description="useful when you want to detect the human pose of the image. like: generate human poses "
-            #                  "of this image, or generate a pose image from this image."
-            #                  "The input to this tool should be a string, representing the image_path"),
-            # Tool(name="Generate Image Condition On Pose Image", func=self.pose2image.inference,
-            #      description="useful when you want to generate a new real image from both the user description and a "
-            #                  "human pose image. like: generate a real image of a human from this human pose image, "
-            #                  "or generate a new real image of a human from this pose."
-            #                  "The input to this tool should be a comma separated string of two, representing the "
-            #                  "image_path and the user description"),
-            # Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
-            #      description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
-            #                  "The input to this tool should be a string, representing the audio_path"),
-            # Tool(name="Generate Text From Speech", func=self.coqui_tts.gen_speech_from_text,
-            #      description="useful when you want to generate a speech from a text. like: generate a speech from "
-            #                  "this text, or generate a speech from this sentence. "
-            #                  "The input to this tool should be a string, representing the text to be converted to "
-            #                  "speech."
-            #      ),
-            # Tool(name="Answer Question About The table", func=self.tableQA.get_answer_from_question_and_table,
-            #      description="useful when you need an answer for a question based on a table. like: what is the "
-            #                  "maximum of the column age, or  what is the sum of row 5 from the following table."
-            #                  "The input to this tool should be a comma separated string, representing the "
-            #                  "table_path and the questions"),
-            # Tool(name="Call a phone number with text", func=self.twilio_caller.call_with_text,
-            #      description="useful when you need to call a phone number with a text input. like: call +4917686490193 and"
-            #                  " tell him \"happy birthday\". The input to this tool should be a comma separate string "
-            #                  "representing the text_input and the phone_number"),
-            # Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
-            #      description="useful when you need to call a phone number with an audio file. like: call +4917686490193 and"
-            #                  " using audio file audio/smth.wav. Only use audio files mentioned by the user."
-            #                  "The input to this tool should be a comma separated string representing the audio file name and the phone_number"),
+            Tool(name="Get Photo Description", func=self.i2t.inference,
+                 description="useful when you want to know what is inside the photo. receives image_path as input. "
+                             "The input to this tool should be a string, representing the image_path. "),
+            Tool(name="Generate Image From User Input Text", func=self.t2i.inference,
+                 description="useful when you want to generate an image from a user input text and save it to a file. "
+                             "like: generate an image of an object or something, or generate an image that includes "
+                             "some objects."
+                             "The input to this tool should be a string, representing the text used to generate image. "),
+
+            Tool(name="Instruct Image Using Text", func=self.pix2pix.inference,
+                 description="useful when you want to the style of the image to be like the text. like: make it look "
+                             "like a painting. or make it like a robot."
+                             "The input to this tool should be a comma separated string of two, representing the "
+                             "image_path and the text. "),
+            Tool(name="Answer Question About The Image", func=self.BLIPVQA.get_answer_from_question_and_image,
+                 description="useful when you need an answer for a question based on an image. like: what is the "
+                             "background color of the last image, how many cats in this figure, what is in this figure."
+                             "The input to this tool should be a comma separated string of two, representing the "
+                             "image_path and the question"),
+            Tool(name="Segmentation On Image", func=self.image2seg.inference,
+                 description="useful when you want to detect segmentations of the image. like: segment this image, "
+                             "or generate segmentations on this image, or perform segmentation on this image."
+                             "The input to this tool should be a string, representing the image_path"),
+            Tool(name="Generate Image Condition On Segmentations", func=self.seg2image.inference,
+                 description="useful when you want to generate a new real image from both the user description and "
+                             "segmentations. like: generate a real image of a object or something from this "
+                             "segmentation image, or generate a new real image of a object or something from these "
+                             "segmentations."
+                             "The input to this tool should be a comma separated string of two, representing the "
+                             "image_path and the user description"),
+            Tool(name="Pose Detection On Image", func=self.image2pose.inference,
+                 description="useful when you want to detect the human pose of the image. like: generate human poses "
+                             "of this image, or generate a pose image from this image."
+                             "The input to this tool should be a string, representing the image_path"),
+            Tool(name="Generate Image Condition On Pose Image", func=self.pose2image.inference,
+                 description="useful when you want to generate a new real image from both the user description and a "
+                             "human pose image. like: generate a real image of a human from this human pose image, "
+                             "or generate a new real image of a human from this pose."
+                             "The input to this tool should be a comma separated string of two, representing the "
+                             "image_path and the user description"),
+            Tool(name="Generate Text from Audio", func=self.whisper.transcribe,
+                 description="useful when you want to generate text from audio. like: generate text from this audio, or transcribe this audio, or listen to this audio. receives audio_path as input."
+                             "The input to this tool should be a string, representing the audio_path"),
+            Tool(name="Generate Speech From Text", func=self.coqui_tts.gen_speech_from_text,
+                 description="useful when you want to generate a speech from a text. like: generate a speech from "
+                             "this text, or say this text in audio. "
+                             "The input to this tool should be a string, representing the text to be converted to "
+                             "speech."
+                 ),
+            Tool(name="Answer Question About The table", func=self.tableQA.get_answer_from_question_and_table,
+                 description="useful when you need an answer for a question based on a table. like: what is the "
+                             "maximum of the column age, or  what is the sum of row 5 from the following table."
+                             "The input to this tool should be a comma separated string, representing the "
+                             "table_path and the questions"),
+            Tool(name="Call a phone number with text", func=self.twilio_caller.call_with_text,
+                 description="useful when you need to call a phone number with a text input. like: call +4917686490193 and"
+                             " tell him \"happy birthday\". The input to this tool should be a comma separate string "
+                             "representing the text_input and the phone_number"),
+            Tool(name="Call a phone number with audio", func=self.twilio_caller.call_with_audio,
+                 description="useful when you need to call a phone number with an audio file. like: call +4917686490193 and"
+                             " using audio file audio/smth.wav. Only use audio files mentioned by the user."
+                             "The input to this tool should be a comma separated string representing the audio file name and the phone_number"),
         ]
 
         self.agent = initialize_agent(
@@ -620,7 +619,6 @@ class ConversationBot:
         print("Outputs:", state)
         return state, audio, state, txt + ' ' + audio_filename + ' '
 
-    # bot.run_df, [persist_df, state, txt], [chatbot, persist_df, state, txt])
 
     def run_df(self, df, state, txt):
         print("===============Running run_df =============")
@@ -646,18 +644,20 @@ if __name__ == '__main__':
         chatbot = gr.Chatbot(elem_id="chatbot", label="Chat History")
         state = gr.State([])
         with gr.Row():
-            with gr.Column(scale=0.7):
+            with gr.Column(scale=0.8):
                 txt = gr.Textbox(placeholder="Enter text and press enter", label='Instruct with text').style(
                     container=False)
-            with gr.Column(scale=0.15, min_width=0):
-                clear = gr.Button("Clear")
-            with gr.Column(scale=0.15, min_width=0):
+            with gr.Column(scale=0.2, min_width=0):
                 btn = gr.UploadButton("Upload Image", file_types=["image"])
         with gr.Row():
-            with gr.Column(scale=0.25, min_width=0):
-                input_audio = gr.Audio(source="microphone", label='Instruct with Audio')
-            with gr.Column(scale=0.25, min_width=0):
-                audio = gr.Audio(type="filepath", label='Audio output', interactive=False)
+            with gr.Column(scale=0.5, min_width=0):
+                with gr.Row():
+                    with gr.Column(scale=0.5, min_width=0):
+                        input_audio = gr.Audio(source="microphone", label='Instruct with Audio')
+                    with gr.Column(scale=0.5, min_width=0):
+                        audio = gr.Audio(type="filepath", label='Audio output', interactive=False)
+                with gr.Row():
+                    clear = gr.Button("Clear Chat History")
             with gr.Column(scale=0.5, min_width=0):
                 with gr.Row():
                     df = gr.DataFrame(interactive=True, row_count=1, col_count=1, headers=['Column1'], label="Give a Dataframe as input")
