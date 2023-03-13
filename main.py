@@ -1,70 +1,73 @@
-import sys
 import os
+import sys
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-import gradio as gr
-from transformers import AutoModelForCausalLM, AutoTokenizer, CLIPSegProcessor, CLIPSegForImageSegmentation
-import torch
-from diffusers import StableDiffusionPipeline
-from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
 import os
+import random
+import re
+import uuid
+
+import cv2
+import einops
+import gradio as gr
+import numpy as np
+import pandas as pd
+import torch
+import whisper
+from ControlNet.annotator.openpose import OpenposeDetector
+from ControlNet.annotator.uniformer import UniformerDetector
+from ControlNet.annotator.util import HWC3, resize_image
+from ControlNet.cldm.ddim_hacked import DDIMSampler
+from ControlNet.cldm.model import create_model, load_state_dict
+from diffusers import (EulerAncestralDiscreteScheduler,
+                       StableDiffusionInstructPix2PixPipeline,
+                       StableDiffusionPipeline)
+from langchain.agents import load_tools
 from langchain.agents.initialize import initialize_agent
 from langchain.agents.tools import Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.llms.openai import OpenAI
-from langchain.agents import load_tools
-
-import re
-import uuid
-
-from PIL import Image
-import numpy as np
-from omegaconf import OmegaConf
-from transformers import pipeline, BlipProcessor, BlipForConditionalGeneration, BlipForQuestionAnswering
-import cv2
-import einops
-from pytorch_lightning import seed_everything
-import random
 from ldm.util import instantiate_from_config
-from ControlNet.cldm.model import create_model, load_state_dict
-from ControlNet.cldm.ddim_hacked import DDIMSampler
-from ControlNet.annotator.util import HWC3, resize_image
-from ControlNet.annotator.openpose import OpenposeDetector
-from ControlNet.annotator.uniformer import UniformerDetector
-import whisper
+from omegaconf import OmegaConf
+from PIL import Image
+from pytorch_lightning import seed_everything
+from transformers import (AutoModelForCausalLM, AutoTokenizer,
+                          BlipForConditionalGeneration,
+                          BlipForQuestionAnswering, BlipProcessor,
+                          CLIPSegForImageSegmentation, CLIPSegProcessor,
+                          pipeline)
 from TTS.api import TTS
-import pandas as pd
 
-HIVEMIND_PREFIX = """HiveMind is designed to be able to assist with a wide range of text, visual and audio 
+AGENT_CHAIN_PREFIX = """AgentChain is designed to be able to assist with a wide range of text, visual and audio 
 related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of 
-topics. HiveMind is able to generate human-like text based on the input it receives, allowing it to engage in 
+topics. AgentChain is able to generate human-like text based on the input it receives, allowing it to engage in 
 natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
-HiveMind is able to process and understand large amounts of text, images and audios. As a language model, 
-HiveMind can not directly read images or audio, but it has a list of tools to finish different visual, text, audio, 
-math and reasoning tasks. Each image will have a file name formed as "image/xxx.png", and HiveMind can invoke 
+AgentChain is able to process and understand large amounts of text, images and audios. As a language model, 
+AgentChain can not directly read images or audio, but it has a list of tools to finish different visual, text, audio, 
+math and reasoning tasks. Each image will have a file name formed as "image/xxx.png", and AgentChain can invoke 
 different tools to indirectly understand pictures. Each audio will have a file name formed as "audio/xxx.wav", 
-and HiveMind can invoke different tools to indirectly understand audio. When talking about audio, HiveMind is very 
+and AgentChain can invoke different tools to indirectly understand audio. When talking about audio, AgentChain is very 
 strict to the file name and will never fabricate nonexistent files. When using tools to generate new image files, 
-HiveMind is also known that the image may not be the same as the user's demand, and will use other visual 
-question answering tools or description tools to observe the real image. HiveMind is able to use tools in a sequence, 
+AgentChain is also known that the image may not be the same as the user's demand, and will use other visual 
+question answering tools or description tools to observe the real image. AgentChain is able to use tools in a sequence, 
 and is loyal to the tool observation outputs rather than faking the image content and image file name. It will 
 remember to provide the file name from the last tool observation, if a new image is generated.
 
-Human may provide new figures to HiveMind with a description. The description helps HiveMind to understand this 
-image, but HiveMind should use tools to finish following tasks, rather than directly imagine from the description.
+Human may provide new figures to AgentChain with a description. The description helps AgentChain to understand this 
+image, but AgentChain should use tools to finish following tasks, rather than directly imagine from the description.
 
-Overall, HiveMind is a powerful visual dialogue assistant tool that can help with a wide range of tasks and provide 
+Overall, AgentChain is a powerful visual dialogue assistant tool that can help with a wide range of tasks and provide 
 valuable insights and information on a wide range of topics.
 
 
 TOOLS:
 ------
 
-HiveMind  has access to the following tools:"""
+AgentChain  has access to the following tools:"""
 
-HIVEMIND_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
+AGENT_CHAIN_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
 
 ```
 Thought: Do I need to use a tool? Yes
@@ -81,7 +84,7 @@ Thought: Do I need to use a tool? No
 ```
 """
 
-HIVEMIND_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does 
+AGENT_CHAIN_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does 
 not exist. You will remember to provide the image file name loyally if it's provided in the last tool observation.
 
 Begin!
@@ -90,8 +93,8 @@ Previous conversation history:
 {chat_history}
 
 New input: {input}
-Since HiveMind is a text language model, HiveMind must use tools to observe images or audio rather than 
-imagination. The thoughts and observations are only visible for HiveMind, HiveMind should remember to repeat 
+Since AgentChain is a text language model, AgentChain must use tools to observe images or audio rather than 
+imagination. The thoughts and observations are only visible for AgentChain, AgentChain should remember to repeat 
 important information in the final response for Human. Thought: Do I need to use a tool? {agent_scratchpad}"""
 
 
@@ -486,7 +489,7 @@ class TwilioCaller:
 
 class ConversationBot:
     def __init__(self):
-        print("Initializing HiveMind")
+        print("Initializing AgentChain")
         self.llm = OpenAI(temperature=0)
         self.i2t = ImageCaptioning(device="cuda:1")  # 1755
         self.t2i = T2I(device="cuda:1")  # 6677
@@ -579,8 +582,8 @@ class ConversationBot:
             verbose=True,
             memory=self.memory,
             return_intermediate_steps=True,
-            agent_kwargs={'prefix': HIVEMIND_PREFIX, 'format_instructions': HIVEMIND_FORMAT_INSTRUCTIONS,
-                          'suffix': HIVEMIND_SUFFIX}, )
+            agent_kwargs={'prefix': AGENT_CHAIN_PREFIX, 'format_instructions': AGENT_CHAIN_FORMAT_INSTRUCTIONS,
+                          'suffix': AGENT_CHAIN_SUFFIX}, )
 
     def run_text(self, text, state, audio):
         print("===============Running run_text =============")
@@ -664,7 +667,7 @@ class ConversationBot:
 if __name__ == '__main__':
     bot = ConversationBot()
     with gr.Blocks(css="#chatbot .overflow-y-auto{height:500px}") as demo:
-        chatbot = gr.Chatbot(elem_id="chatbot", label="HiveMind")
+        chatbot = gr.Chatbot(elem_id="chatbot", label="AgentChain")
         state = gr.State([])
         with gr.Row():
             with gr.Column(scale=0.8):
