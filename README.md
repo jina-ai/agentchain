@@ -23,7 +23,7 @@ https://user-images.githubusercontent.com/2041322/224820211-98922d33-812f-47d6-8
 
 # Agents in AgentChain
 
-![](architecture.png)
+![](architecture.svg)
 
 AgentChain is a sophisticated system that can orchestrate multiple agents to accomplish sophisticated tasks. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are the five agent groups in AgentChain:
 
