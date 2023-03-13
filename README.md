@@ -18,9 +18,13 @@ AgentChain demo 1: transcribing audio and visualizing as an image. A screenshot 
 
 https://user-images.githubusercontent.com/2041322/224827172-ca038ffc-ebe2-42e7-9bcd-7f26c6be0358.mp4
 
+---
+
 AgentChain demo 2: asking questions about an image. A screenshot of the AgentChain interface shows an image and a question being asked about it, with the resulting answer displayed below.
 
 https://user-images.githubusercontent.com/2041322/224823758-75be4ac9-6572-4d77-94b7-8b63c6ea4be3.mp4
+
+---
 
 AgentChain demo 3: question-answering on tabular data and making a phone call. A screenshot of the AgentChain interface shows a table of data with a question being asked and the resulting answer displayed, followed by a phone call being made using the `CommsAgent`.
 
