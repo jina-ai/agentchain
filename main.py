@@ -500,10 +500,10 @@ class ConversationBot:
         self.image2seg = image2seg()
         self.seg2image = seg2image(device="cuda:1")  # 5540
         ## up until now, comsuming  23362 MB on GPU
-        self.pix2pix = Pix2Pix(device="cuda:2")  # 2795
+        self.pix2pix = Pix2Pix(device="cuda:0")  # 2795
         self.coqui_tts = coqui_tts(device=False)
-        self.tableQA = TableQA(device="cuda:2")
-        self.whisper = Whisper(device="cuda:2")
+        self.tableQA = TableQA(device="cuda:0")
+        self.whisper = Whisper(device="cuda:0")
         self.twilio_caller = TwilioCaller()
         self.extra_tools = ["serpapi", "llm-math", "python_repl", "requests", "terminal"]
 
