@@ -33,6 +33,13 @@ AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket 
 5. Run the main script: `python main.py`
 
 
+## System requirements
+As of [this commit](https://github.com/jina-ai/agentchain/commit/da588a728c390fb538fd361d4f41dd50aa193751), it is needed to have at least 29 GB of GPU memory to run the AgentChain.
+However, make sure to assign GPU devices correctly in `main.py`.
+
+You can comment out some tools and models to reduce the GPU memory footprint (but for less capabilities).
+
+
 # Demo
 
 
@@ -125,12 +132,6 @@ Here is how AgentChain can help by chaining different agents together:
 3. Use `NLPAgent` (`GPT`) to generate personalized recommendations for diet, exercise, and medication, taking into account the seniors' health goals and preferences.
 4. Use `CommsAgent` (`TwilioCaller`, `TwilioMessenger`) to advise, make reminders and provide alerts to help stay on track with their health goals, improving their quality of life and reducing the need for emergency care.
 
-
-## System requirements
-As of [this commit](https://github.com/jina-ai/agentchain/commit/da588a728c390fb538fd361d4f41dd50aa193751), it is needed to have at least 29 GB of GPU memory to run the AgentChain.
-However, make sure to assign GPU devices correctly in `main.py`.
-
-You can comment out some tools and models to reduce the GPU memory footprint (but for less capabilities).
 
 ## Acknowledgements
 We appreciate the open source of the following projects:
