@@ -98,7 +98,7 @@ Here is how AgentChain can help by chaining different agents together:
 1. Use `DBAgent` to handle input from various health monitoring devices (e.g., heart rate monitors, blood pressure monitors, sleep trackers), providing real-time health data and alerts to the health assistant.
 2. Use `SearchAgent` (`Google Search API`, `Wikipedia API`) to provide information about health topics and medications, such as side effects, dosage, and interactions.
 3. Use `ToolsAgent` (`Python REPL`) to perform calculations related to medication dosages or nutritional requirements, providing personalized advice and reminders to seniors.
-4. Use `MultiModalAgent` (`ControlNet`, `GPT`) to generate personalized recommendations for diet, exercise, and medication, taking into account the seniors' health goals and preferences.
+4. Use `MultiModalAgent` (`GPT`) to generate personalized recommendations for diet, exercise, and medication, taking into account the seniors' health goals and preferences.
 5. Use `CommsAgent` (`TwilioCaller`, `TwilioMessenger`) to make reminders and provide alerts to help seniors stay on track with their health goals, improving their quality of life and reducing the need for emergency care.
 
 
