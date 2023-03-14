@@ -4,18 +4,33 @@
 
 AgentChain uses Large Language Models (LLMs) for reasoning and orchestrating multiple LLMs or Large Models (LMs) for accomplishing sophisticated tasks. AgentChain is fully multimodal: it accepts text, image, audio, webcam, tabular data as input and output.
 
-- **🧠 Leverage LLMs:** AgentChain leverages state-of-the-art Large Language Models to provide users with the ability to reason and make decisions based on natural language inputs. This feature makes AgentChain a versatile tool for a wide range of applications, such as natural language processing, sentiment analysis, and chatbots.
-- **🌟 Fully Multimodal:** AgentChain is fully multimodal, accepting input and output from various modalities, such as text, image, audio, or video. This feature makes AgentChain a versatile tool for a wide range of applications, such as computer vision, speech recognition, and multimodal fusion.
-- **🤝 Orchestrate Multiple Agents:** AgentChain can orchestrate multiple agents to perform complex tasks, making it a powerful tool for projects that require extensive research, data analysis, or computation. This feature makes AgentChain a versatile tool for a wide range of applications, such as e-commerce, finance, healthcare, and more.
+- **🧠 LLMs as the brain:** AgentChain leverages state-of-the-art Large Language Models to provide users with the ability to reason and make decisions based on natural language inputs. This feature makes AgentChain a versatile tool for a wide range of applications, such as natural language processing, sentiment analysis, and chatbots.
+- **🌟 Fully Multimodal IO:** AgentChain is fully multimodal, accepting input and output from various modalities, such as text, image, audio, or video. This feature makes AgentChain a versatile tool for a wide range of applications, such as computer vision, speech recognition, and multimodal fusion.
+- **🤝 Orchestrate Versatile Agents:** AgentChain can orchestrate multiple agents to perform complex tasks, making it a powerful tool for projects that require extensive research, data analysis, or computation. This feature makes AgentChain a versatile tool for a wide range of applications, such as e-commerce, finance, healthcare, and more.
 - **🔧 Customizable for Ad-hoc Needs:** AgentChain can be customized to fit specific project requirements, making it a versatile tool for a wide range of applications. The system can work with different programming languages, APIs, and platforms, providing maximum flexibility and adaptability.
 
 
 
 # Demo
 
-https://user-images.githubusercontent.com/2041322/224817687-77eb1863-ba65-44dd-9205-50a7a461e6af.mp4
 
-https://user-images.githubusercontent.com/2041322/224820211-98922d33-812f-47d6-858b-5d600a1d7e91.mp4
+AgentChain demo 1: transcribing audio and visualizing as an image. A screenshot of the AgentChain interface shows an audio waveform and the resulting image, which is a graph of the audio data.
+
+https://user-images.githubusercontent.com/2041322/224827172-ca038ffc-ebe2-42e7-9bcd-7f26c6be0358.mp4
+
+---
+
+AgentChain demo 2: asking questions about an image. A screenshot of the AgentChain interface shows an image and a question being asked about it, with the resulting answer displayed below.
+
+https://user-images.githubusercontent.com/2041322/224823758-75be4ac9-6572-4d77-94b7-8b63c6ea4be3.mp4
+
+---
+
+AgentChain demo 3: question-answering on tabular data and making a phone call. A screenshot of the AgentChain interface shows a table of data with a question being asked and the resulting answer displayed, followed by a phone call being made using the `CommsAgent`.
+
+
+
+https://user-images.githubusercontent.com/2041322/224829592-b37d04fc-8c86-4fcf-ab0c-a9001c7cc4e7.mp4
 
 
 
@@ -23,7 +38,7 @@ https://user-images.githubusercontent.com/2041322/224820211-98922d33-812f-47d6-8
 
 # Agents in AgentChain
 
-![](architecture.png)
+![](architecture.svg)
 
 AgentChain is a sophisticated system that can orchestrate multiple agents to accomplish sophisticated tasks. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are the five agent groups in AgentChain:
 
