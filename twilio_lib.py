@@ -36,14 +36,14 @@ def push_to_s3(file_name, extension, content_type=None):
 
     s3 = boto3.client('s3')
 
-    bucket_name = 'god-llm'
+    bucket_name = os.getenv('AWS_S3_BUCKET_NAME', 'god-llm')
     file_name = file_name
     object_key = f'twilml/{str(uuid.uuid4())[0:4]}.{extension}'
     extra_args = {'ACL': 'public-read'}
     if content_type:
         extra_args["ContentType"] = content_type
     s3.upload_file(file_name, bucket_name, object_key, ExtraArgs=extra_args)
-    return f'https://god-llm.s3.eu-central-1.amazonaws.com/{object_key}'
+    return f'https://{bucket_name}.s3.eu-central-1.amazonaws.com/{object_key}'
 
 def call_with_twilml_url(twilml_url, phone_number):
     # Find your Account SID and Auth Token at twilio.com/console
@@ -55,7 +55,6 @@ def call_with_twilml_url(twilml_url, phone_number):
     call = client.calls.create(
         method='GET',
         url=twilml_url,
-        # to='+4917686490193',
         to=phone_number,
         from_='+15673393771'
     )
