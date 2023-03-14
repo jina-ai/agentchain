@@ -101,7 +101,22 @@ Here is how AgentChain can help by chaining different agents together:
 
 
 # Get started
+1. install requirements: `pip install requirements.txt`
+2. Download model checkpoints: `bash download.sh`
+3. Depending on the agents you need in-place, make sure to export environment variables
 
+```shell
+OPENAI_API_KEY={YOUR_OPENAI_API_KEY} # mandatory since the LLM is central in this application
+SERPAPI_API_KEY={YOUR_SERPAPI_API_KEY}  # make sure to include a serp API key in case you need the agent to be able to search the web
+
+# These environment variables are needed in case you want the agent to be able to make phone calls
+AWS_ACCESS_KEY_ID={YOUR_AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY={YOUR_AWS_SECRET_ACCESS_KEY}
+TWILIO_ACCOUNT_SID={YOUR_TWILIO_ACCOUNT_SID}
+TWILIO_AUTH_TOKEN={YOUR_TWILIO_AUTH_TOKEN}
+```
+4. Install `ffmpeg` library (needed for whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
+5. Run the main script: `python main.py`
 
 ## Acknowledgement
 We appreciate the open source of the following projects:
