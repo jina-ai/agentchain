@@ -1,11 +1,7 @@
 import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-import os
 import random
 import re
+import sys
 import uuid
 
 import cv2
@@ -38,6 +34,9 @@ from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           CLIPSegForImageSegmentation, CLIPSegProcessor,
                           pipeline)
 from TTS.api import TTS
+
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 AGENT_CHAIN_PREFIX = """AgentChain is designed to be able to assist with a wide range of text, visual and audio 
 related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of 
