@@ -119,6 +119,12 @@ AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket 
 4. Install `ffmpeg` library (needed for whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
 5. Run the main script: `python main.py`
 
+## System requirements
+As of da588a728c390fb538fd361d4f41dd50aa193751, it is needed to have at least 29 GB of GPU memory to run the AgentChain.
+However, make sure to assign GPU devices correctly in `main.py`.
+
+You can comment out some tools and models to reduce the GPU memory footprint (but for less capabilities).
+
 ## Acknowledgement
 We appreciate the open source of the following projects:
 
