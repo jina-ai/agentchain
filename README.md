@@ -40,10 +40,10 @@ https://user-images.githubusercontent.com/2041322/224829592-b37d04fc-8c86-4fcf-a
 
 ![](architecture.svg)
 
-AgentChain is a sophisticated system with goal of solving general problems. It can orchestrate multiple agents to accomplish sub problems. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are some of the agent groups in AgentChain:
+AgentChain is a sophisticated system with the goal of solving general problems. It can orchestrate multiple agents to accomplish sub-problems. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are some of the agent groups in AgentChain:
 
 ### SearchAgents
-The `SearchAgents` group is responsible for gathering information from various sources, including search engines, online databases, and APIs. The agents in this group are highly skilled at retrieving up to date, world knowledge information. Some examples of agents in this group include the `Google Search API`, `Bing API`, `Wikipedia API`, and `Serp`.
+The `SearchAgents` group is responsible for gathering information from various sources, including search engines, online databases, and APIs. The agents in this group are highly skilled at retrieving up-to-date world knowledge information. Some examples of agents in this group include the `Google Search API`, `Bing API`, `Wikipedia API`, and `Serp`.
 
 ### CommsAgents
 The `CommsAgents` group is responsible for handling communication between different parties, such as sending emails, making phone calls, or messaging via various platforms. The agents in this group can integrate with a wide range of platforms. Some examples of agents in this group include `TwilioCaller`, `TwilioEmailWriter`, `TwilioMessenger` and `Slack`.
@@ -55,10 +55,10 @@ The `ToolsAgents` group is responsible for performing various computational task
 The `MultiModalAgents` group is responsible for handling input and output from various modalities, such as text, image, audio, or video (coming soon). The agents in this group can process and understand different modalities. Some examples of agents in this group include `OpenAI Whisper`, `Blip2`, `Coqui`, and `StableDiffusion`.
 
 ### ImageAgents
-The `ImageAgents` group is responsible for processing and manipulating images, such as enhancing image quality, object detection, or image recognition. The agents in this group can perform complex operations on them. Some examples of agents in this group include `Upscaler`, `ControlNet` and `YOLO`.
+The `ImageAgents` group is responsible for processing and manipulating images, such as enhancing image quality, object detection, or image recognition. The agents in this group can perform complex operations on images. Some examples of agents in this group include `Upscaler`, `ControlNet` and `YOLO`.
 
 ### DBAgents
-The `DBAgents` group is responsible for adding and fetching data from your database, such as getting metrics or aggregations from your database. The agents in this group will interact with databases and enrich other agents with your database information. Some examples of agents in this group include `SQL`, `MongoDB`, `ElasticSearch`, `Qrant` and `Notion`.
+The `DBAgents` group is responsible for adding and fetching data from your database, such as getting metrics or aggregations from your database. The agents in this group interact with databases and enrich other agents with your database information. Some examples of agents in this group include `SQL`, `MongoDB`, `ElasticSearch`, `Qrant` and `Notion`.
 
 
 # Examples
@@ -103,22 +103,22 @@ Here is how AgentChain can help by chaining different agents together:
 
 
 # Get started
-1. install requirements: `pip install -r requirements.txt`
+1. Install requirements: `pip install -r requirements.txt`
 2. Download model checkpoints: `bash download.sh`
 3. Depending on the agents you need in-place, make sure to export environment variables
 
 ```shell
 OPENAI_API_KEY={YOUR_OPENAI_API_KEY} # mandatory since the LLM is central in this application
-SERPAPI_API_KEY={YOUR_SERPAPI_API_KEY}  # make sure to include a serp API key in case you need the agent to be able to search the web
+SERPAPI_API_KEY={YOUR_SERPAPI_API_KEY}  # make sure to include a serp API key if you need the agent to be able to search the web
 
-# These environment variables are needed in case you want the agent to be able to make phone calls
+# These environment variables are needed if you want the agent to be able to make phone calls
 AWS_ACCESS_KEY_ID={YOUR_AWS_ACCESS_KEY_ID}
 AWS_SECRET_ACCESS_KEY={YOUR_AWS_SECRET_ACCESS_KEY}
 TWILIO_ACCOUNT_SID={YOUR_TWILIO_ACCOUNT_SID}
 TWILIO_AUTH_TOKEN={YOUR_TWILIO_AUTH_TOKEN}
 AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket with public access
 ```
-4. Install `ffmpeg` library (needed for whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
+4. Install the `ffmpeg` library (needed for Whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
 5. Run the main script: `python main.py`
 
 ## Acknowledgement
@@ -132,5 +132,3 @@ We appreciate the open source of the following projects:
 [CLIPSeg](https://github.com/timojl/clipseg) &#8194;
 [BLIP](https://github.com/salesforce/BLIP) &#8194;
 [Microsoft](https://github.com/microsoft/visual-chatgpt) &#8194;
-
-
