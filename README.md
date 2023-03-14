@@ -65,10 +65,10 @@ Check the Demo section to understand what we achieved so far.
 
 ![](architecture.svg)
 
-AgentChain is a sophisticated system with goal of solving general problems. It can orchestrate multiple agents to accomplish sub problems. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are some of the agent groups in AgentChain:
+AgentChain is a sophisticated system with the goal of solving general problems. It can orchestrate multiple agents to accomplish sub-problems. These agents are organized into different groups, each with their unique set of capabilities and functionalities. Here are some of the agent groups in AgentChain:
 
 ### SearchAgents
-The `SearchAgents` group is responsible for gathering information from various sources, including search engines, online databases, and APIs. The agents in this group are highly skilled at retrieving up to date, world knowledge information. Some examples of agents in this group include the `Google Search API`, `Bing API`, `Wikipedia API`, and `Serp`.
+The `SearchAgents` group is responsible for gathering information from various sources, including search engines, online databases, and APIs. The agents in this group are highly skilled at retrieving up-to-date world knowledge information. Some examples of agents in this group include the `Google Search API`, `Bing API`, `Wikipedia API`, and `Serp`.
 
 ### CommsAgents
 The `CommsAgents` group is responsible for handling communication between different parties, such as sending emails, making phone calls, or messaging via various platforms. The agents in this group can integrate with a wide range of platforms. Some examples of agents in this group include `TwilioCaller`, `TwilioEmailWriter`, `TwilioMessenger` and `Slack`.
@@ -80,10 +80,10 @@ The `ToolsAgents` group is responsible for performing various computational task
 The `MultiModalAgents` group is responsible for handling input and output from various modalities, such as text, image, audio, or video (coming soon). The agents in this group can process and understand different modalities. Some examples of agents in this group include `OpenAI Whisper`, `Blip2`, `Coqui`, and `StableDiffusion`.
 
 ### ImageAgents
-The `ImageAgents` group is responsible for processing and manipulating images, such as enhancing image quality, object detection, or image recognition. The agents in this group can perform complex operations on them. Some examples of agents in this group include `Upscaler`, `ControlNet` and `YOLO`.
+The `ImageAgents` group is responsible for processing and manipulating images, such as enhancing image quality, object detection, or image recognition. The agents in this group can perform complex operations on images. Some examples of agents in this group include `Upscaler`, `ControlNet` and `YOLO`.
 
 ### DBAgents
-The `DBAgents` group is responsible for adding and fetching data from your database, such as getting metrics or aggregations from your database. The agents in this group will interact with databases and enrich other agents with your database information. Some examples of agents in this group include `SQL`, `MongoDB`, `ElasticSearch`, `Qrant` and `Notion`.
+The `DBAgents` group is responsible for adding and fetching data from your database, such as getting metrics or aggregations from your database. The agents in this group interact with databases and enrich other agents with your database information. Some examples of agents in this group include `SQL`, `MongoDB`, `ElasticSearch`, `Qrant` and `Notion`.
 
 
 # Potential Applications
@@ -126,7 +126,7 @@ Here is how AgentChain can help by chaining different agents together:
 4. Use `CommsAgent` (`TwilioCaller`, `TwilioMessenger`) to advise, make reminders and provide alerts to help stay on track with their health goals, improving their quality of life and reducing the need for emergency care.
 
 
-## Acknowledgement
+## Acknowledgements
 We appreciate the open source of the following projects:
 
 [Hugging Face](https://github.com/huggingface) &#8194;
@@ -137,5 +137,3 @@ We appreciate the open source of the following projects:
 [CLIPSeg](https://github.com/timojl/clipseg) &#8194;
 [BLIP](https://github.com/salesforce/BLIP) &#8194;
 [Microsoft](https://github.com/microsoft/visual-chatgpt) &#8194;
-
-
