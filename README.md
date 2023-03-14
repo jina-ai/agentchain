@@ -126,7 +126,7 @@ Here is how AgentChain can help by chaining different agents together:
 4. Use `CommsAgent` (`TwilioCaller`, `TwilioMessenger`) to advise, make reminders and provide alerts to help stay on track with their health goals, improving their quality of life and reducing the need for emergency care.
 
 
-## Acknowledgement
+## Acknowledgements
 We appreciate the open source of the following projects:
 
 [Hugging Face](https://github.com/huggingface) &#8194;
