@@ -127,7 +127,7 @@ Here is how AgentChain can help by chaining different agents together:
 
 
 ## System requirements
-As of da588a728c390fb538fd361d4f41dd50aa193751, it is needed to have at least 29 GB of GPU memory to run the AgentChain.
+As of [this commit](https://github.com/jina-ai/agentchain/commit/da588a728c390fb538fd361d4f41dd50aa193751), it is needed to have at least 29 GB of GPU memory to run the AgentChain.
 However, make sure to assign GPU devices correctly in `main.py`.
 
 You can comment out some tools and models to reduce the GPU memory footprint (but for less capabilities).
