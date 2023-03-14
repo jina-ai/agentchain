@@ -114,6 +114,7 @@ AWS_ACCESS_KEY_ID={YOUR_AWS_ACCESS_KEY_ID}
 AWS_SECRET_ACCESS_KEY={YOUR_AWS_SECRET_ACCESS_KEY}
 TWILIO_ACCOUNT_SID={YOUR_TWILIO_ACCOUNT_SID}
 TWILIO_AUTH_TOKEN={YOUR_TWILIO_AUTH_TOKEN}
+AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket with public access
 ```
 4. Install `ffmpeg` library (needed for whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
 5. Run the main script: `python main.py`
