@@ -101,7 +101,7 @@ Here is how AgentChain can help by chaining different agents together:
 
 
 # Get started
-1. install requirements: `pip install requirements.txt`
+1. install requirements: `pip install -r requirements.txt`
 2. Download model checkpoints: `bash download.sh`
 3. Depending on the agents you need in-place, make sure to export environment variables
 
