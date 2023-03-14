@@ -9,8 +9,7 @@ AgentChain uses Large Language Models (LLMs) for planning and orchestrating mult
 - **🤝 Orchestrate Versatile Agents:** AgentChain can orchestrate multiple agents to perform complex tasks. Using composability and hierarchical structuring of tools AgentChain can choose intelligently which tools to use and when for a certain task. This feature makes AgentChain a powerful tool for projects that require complex combination of tools.
 - **🔧 Customizable for Ad-hoc Needs:** AgentChain can be customized to fit specific project requirements, making it a versatile tool for a wide range of applications. Specific requirements can be met by enhancing capabilities with new agents (and distributed architecture coming soon).
 
-P.S: the content of this document mostly shows **our vision** and **what we aim to achieve** with AgentChain.
-Check the Demo section to understand what we achieved so far.
+
 
 
 
@@ -60,6 +59,9 @@ https://user-images.githubusercontent.com/2041322/224829592-b37d04fc-8c86-4fcf-a
 
 
 # Agents in AgentChain
+
+> The content of this document mostly shows **our vision** and **what we aim to achieve** with AgentChain.
+Check the Demo section to understand what we achieved so far.
 
 ![](architecture.svg)
 
