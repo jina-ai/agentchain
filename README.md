@@ -85,7 +85,7 @@ Here is how AgentChain can help by chaining different agents together:
 As an e-commerce site that wants to provide excellent customer service, it is crucial to have a chatbot that can handle customer inquiries and support requests in a timely and efficient manner. However, building a chatbot that can understand and respond to complex customer requests can be challenging. That's why the e-commerce site wants to use AgentChain to automate the chatbot process and provide superior customer service with the help of various agents.
 
 Here is how AgentChain can help by chaining different agents together:
-1. Use `MultiModalAgent` (`Blip2`, `Whisper`) to handle input from various modalities (text, image, audio, webcam), making it easier for customers to ask questions and make requests in a natural way.
+1. Use `MultiModalAgent` (`Blip2`, `Whisper`) to handle input from various modalities (text, image, audio), making it easier for customers to ask questions and make requests in a natural way.
 2. Use `SearchAgent` (`Google Search API`, `Wikipedia API`) to provide information about products or services, such as specifications, pricing, and availability.
 3. Use `CommsAgent` (`TwilioMessenger`) to communicate with customers via messaging platforms, providing support and answering questions in real-time.
 4. Use `ToolsAgent` (`Math`) to perform calculations related to discounts, taxes, or shipping costs, helping customers make informed decisions about their purchases.
