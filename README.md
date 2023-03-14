@@ -12,6 +12,28 @@ AgentChain uses Large Language Models (LLMs) for planning and orchestrating mult
 P.S: the content of this document mostly shows **our vision** and **what we aim to achieve** with AgentChain.
 Check the Demo section to understand what we achieved so far.
 
+
+
+# Get started
+1. Install requirements: `pip install -r requirements.txt`
+2. Download model checkpoints: `bash download.sh`
+3. Depending on the agents you need in-place, make sure to export environment variables
+
+```shell
+OPENAI_API_KEY={YOUR_OPENAI_API_KEY} # mandatory since the LLM is central in this application
+SERPAPI_API_KEY={YOUR_SERPAPI_API_KEY}  # make sure to include a serp API key in case you need the agent to be able to search the web
+
+# These environment variables are needed in case you want the agent to be able to make phone calls
+AWS_ACCESS_KEY_ID={YOUR_AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY={YOUR_AWS_SECRET_ACCESS_KEY}
+TWILIO_ACCOUNT_SID={YOUR_TWILIO_ACCOUNT_SID}
+TWILIO_AUTH_TOKEN={YOUR_TWILIO_AUTH_TOKEN}
+AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket with public access
+```
+4. Install `ffmpeg` library (needed for whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
+5. Run the main script: `python main.py`
+
+
 # Demo
 
 
@@ -62,7 +84,7 @@ The `ImageAgents` group is responsible for processing and manipulating images, s
 The `DBAgents` group is responsible for adding and fetching data from your database, such as getting metrics or aggregations from your database. The agents in this group will interact with databases and enrich other agents with your database information. Some examples of agents in this group include `SQL`, `MongoDB`, `ElasticSearch`, `Qrant` and `Notion`.
 
 
-# Examples
+# Potential Applications
 
 ### Example 1: 🏝️📸🌅 AgentChain Image Generation System for Travel Company
 As a travel company that is promoting a new and exotic destination, it is crucial to have high-quality images that can grab the attention of potential travelers. However, manually creating stunning images can be time-consuming and expensive. That's why the travel company wants to use AgentChain to automate the image generation process and create beautiful visuals with the help of various agents.
@@ -101,26 +123,6 @@ Here is how AgentChain can help by chaining different agents together:
 3. Use `NLPAgent` (`GPT`) to generate personalized recommendations for diet, exercise, and medication, taking into account the seniors' health goals and preferences.
 4. Use `CommsAgent` (`TwilioCaller`, `TwilioMessenger`) to advise, make reminders and provide alerts to help stay on track with their health goals, improving their quality of life and reducing the need for emergency care.
 
-
-
-# Get started
-1. install requirements: `pip install -r requirements.txt`
-2. Download model checkpoints: `bash download.sh`
-3. Depending on the agents you need in-place, make sure to export environment variables
-
-```shell
-OPENAI_API_KEY={YOUR_OPENAI_API_KEY} # mandatory since the LLM is central in this application
-SERPAPI_API_KEY={YOUR_SERPAPI_API_KEY}  # make sure to include a serp API key in case you need the agent to be able to search the web
-
-# These environment variables are needed in case you want the agent to be able to make phone calls
-AWS_ACCESS_KEY_ID={YOUR_AWS_ACCESS_KEY_ID}
-AWS_SECRET_ACCESS_KEY={YOUR_AWS_SECRET_ACCESS_KEY}
-TWILIO_ACCOUNT_SID={YOUR_TWILIO_ACCOUNT_SID}
-TWILIO_AUTH_TOKEN={YOUR_TWILIO_AUTH_TOKEN}
-AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket with public access
-```
-4. Install `ffmpeg` library (needed for whisper): `sudo apt update && sudo apt install ffmpeg` (Ubuntu command)
-5. Run the main script: `python main.py`
 
 ## Acknowledgement
 We appreciate the open source of the following projects:
