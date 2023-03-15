@@ -45,25 +45,19 @@ You can comment out some tools and models to reduce the GPU memory footprint (bu
 
 AgentChain demo 1: transcribing audio and visualizing the result as an image. A video of the AgentChain interface shows an uploaded audio and the resulting generated image, which is a representation of the audio content.
 
-https://user-images.githubusercontent.com/2041322/224827172-ca038ffc-ebe2-42e7-9bcd-7f26c6be0358.mp4
+https://user-images.githubusercontent.com/4182659/225347932-87298e6c-58d0-4a29-892f-1398b1406c15.mp4
 
 ---
 
 AgentChain demo 2: asking questions about an image. A video of the AgentChain interface shows an image and a question being asked about it, with the resulting answer displayed below.
 
-https://user-images.githubusercontent.com/2041322/224823758-75be4ac9-6572-4d77-94b7-8b63c6ea4be3.mp4
+https://user-images.githubusercontent.com/4182659/225348027-ed30f9d5-d05b-405a-9651-c08f4976cf83.mp4
 
 ---
 
 AgentChain demo 3: question-answering on tabular data and making a phone call to report the results. A video of the AgentChain interface shows a table of data with a question being asked and the resulting answer displayed, followed by a phone call being made using the `CommsAgent`.
 
-
-
-https://user-images.githubusercontent.com/2041322/224829592-b37d04fc-8c86-4fcf-ab0c-a9001c7cc4e7.mp4
-
-
-
-
+https://user-images.githubusercontent.com/4182659/225348128-6e9bdb3b-78ed-49e8-80f5-fd7c9ad66f28.mp4
 
 # Agents in AgentChain
 
