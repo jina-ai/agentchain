@@ -34,3 +34,9 @@ pandas
 twilio
 boto3
 google-search-results
+# crwaler agent
+selenium
+bs4
+tiktoken
+replicate
+lxml
