@@ -23,7 +23,7 @@ from langchain.agents import load_tools
 from langchain.agents.initialize import initialize_agent
 from langchain.agents.tools import Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
-from langchain.llms.openai import OpenAI
+from llm_provider import get_llm
 from ldm.util import instantiate_from_config
 from omegaconf import OmegaConf
 from PIL import Image
@@ -491,7 +491,7 @@ class TwilioCaller:
 class ConversationBot:
     def __init__(self):
         print("Initializing AgentChain")
-        self.llm = OpenAI(temperature=0)
+        self.llm = get_llm(temperature=0)
         self.i2t = ImageCaptioning(device="cuda:1")  # 1755
         self.t2i = T2I(device="cuda:1")  # 6677
         self.image2pose = image2pose()
