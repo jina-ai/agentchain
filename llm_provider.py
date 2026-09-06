@@ -5,9 +5,11 @@ The default provider is OpenAI (mirroring the original behavior of
 ``OpenAI(temperature=0)``). Setting the ``LLM_PROVIDER`` environment variable
 to ``minimax`` routes the agent through MiniMax's OpenAI-compatible endpoint.
 
-MiniMax exposes both global and China OpenAI-compatible endpoints. The region is
-selected through ``MINIMAX_REGION`` (``global_en`` by default, ``cn_zh`` for the
-China endpoint). See the ``MINIMAX_REGIONAL_ENDPOINTS`` mapping below.
+MiniMax exposes OpenAI- and Anthropic-compatible endpoints in both its global
+and China regions. AgentChain uses the OpenAI-compatible URL at runtime, while
+the complete endpoint matrix is declared in ``MINIMAX_REGIONAL_ENDPOINTS``.
+The region is selected through ``MINIMAX_REGION`` (``global_en`` by default,
+``cn_zh`` for the China endpoint).
 
 Usage:
     export LLM_PROVIDER=openai        # default
@@ -21,23 +23,34 @@ Usage:
 
 import os
 
-# MiniMax text models currently supported by AgentChain.
-# Each entry maps a model id to its context window (in tokens). Context windows
-# are sourced from the MiniMax model configuration and must not be hardcoded
-# to a single value across models.
+# MiniMax text models currently supported by AgentChain. Keep the model-specific
+# context, input, and thinking capabilities together so callers do not assume
+# that all models have the same behavior.
 MINIMAX_MODELS = {
-    "MiniMax-M3": 1_000_000,
-    "MiniMax-M2.7": 204_800,
+    "MiniMax-M3": {
+        "context_window": 1_000_000,
+        "input_modalities": ("text", "image", "video"),
+        "thinking_modes": ("adaptive", "disabled"),
+    },
+    "MiniMax-M2.7": {
+        "context_window": 204_800,
+        "input_modalities": ("text",),
+        "thinking_modes": ("always-on",),
+    },
 }
 
 DEFAULT_MINIMAX_MODEL = "MiniMax-M3"
 
-# Regional OpenAI-compatible endpoints for MiniMax.
-# - global_en: https://api.minimax.io
-# - cn_zh:     https://api.minimaxi.com (China)
+# Regional OpenAI- and Anthropic-compatible endpoints for MiniMax.
 MINIMAX_REGIONAL_ENDPOINTS = {
-    "global_en": "https://api.minimax.io/v1",
-    "cn_zh": "https://api.minimaxi.com/v1",
+    "global_en": {
+        "openai": "https://api.minimax.io/v1",
+        "anthropic": "https://api.minimax.io/anthropic",
+    },
+    "cn_zh": {
+        "openai": "https://api.minimaxi.com/v1",
+        "anthropic": "https://api.minimaxi.com/anthropic",
+    },
 }
 
 DEFAULT_MINIMAX_REGION = "global_en"
@@ -96,15 +109,21 @@ def _create_openai_llm(temperature):
     return OpenAI(temperature=temperature)
 
 
-def _resolve_minimax_base_url():
-    """Resolve the MiniMax OpenAI-compatible base URL from the selected region."""
+def _resolve_minimax_base_url(api_format="openai"):
+    """Resolve a MiniMax-compatible base URL from the selected region."""
     region = os.environ.get("MINIMAX_REGION", DEFAULT_MINIMAX_REGION).lower().strip()
     if region not in MINIMAX_REGIONAL_ENDPOINTS:
         raise ValueError(
             f"Unsupported MiniMax region: '{region}'. "
             f"Supported regions: {', '.join(MINIMAX_REGIONAL_ENDPOINTS.keys())}"
         )
-    return MINIMAX_REGIONAL_ENDPOINTS[region]
+    endpoints = MINIMAX_REGIONAL_ENDPOINTS[region]
+    if api_format not in endpoints:
+        raise ValueError(
+            f"Unsupported MiniMax API format: '{api_format}'. "
+            f"Supported formats: {', '.join(endpoints.keys())}"
+        )
+    return endpoints[api_format]
 
 
 def _create_minimax_llm(temperature):

@@ -155,6 +155,20 @@ class TestMiniMaxProvider(unittest.TestCase):
                 _create_minimax_llm(0.5)
             self.assertIn("Unsupported MiniMax region", str(ctx.exception))
 
+    def test_anthropic_endpoint_can_be_resolved(self):
+        from llm_provider import _resolve_minimax_base_url
+        with patch.dict(os.environ, {"MINIMAX_REGION": "global_en"}):
+            self.assertEqual(
+                _resolve_minimax_base_url("anthropic"),
+                "https://api.minimax.io/anthropic",
+            )
+
+    def test_unknown_api_format_raises(self):
+        from llm_provider import _resolve_minimax_base_url
+        with self.assertRaises(ValueError) as ctx:
+            _resolve_minimax_base_url("unsupported")
+        self.assertIn("Unsupported MiniMax API format", str(ctx.exception))
+
     def test_temperature_clamped(self):
         from llm_provider import _create_minimax_llm
         mocks = self._setup_langchain_mocks()
@@ -196,16 +210,41 @@ class TestRegistryConstants(unittest.TestCase):
 
     def test_m3_context_window(self):
         from llm_provider import MINIMAX_MODELS
-        self.assertEqual(MINIMAX_MODELS["MiniMax-M3"], 1_000_000)
+        self.assertEqual(MINIMAX_MODELS["MiniMax-M3"]["context_window"], 1_000_000)
+        self.assertEqual(
+            MINIMAX_MODELS["MiniMax-M3"]["input_modalities"],
+            ("text", "image", "video"),
+        )
+        self.assertEqual(
+            MINIMAX_MODELS["MiniMax-M3"]["thinking_modes"],
+            ("adaptive", "disabled"),
+        )
 
     def test_m27_context_window(self):
         from llm_provider import MINIMAX_MODELS
-        self.assertEqual(MINIMAX_MODELS["MiniMax-M2.7"], 204_800)
+        self.assertEqual(MINIMAX_MODELS["MiniMax-M2.7"]["context_window"], 204_800)
+        self.assertEqual(MINIMAX_MODELS["MiniMax-M2.7"]["input_modalities"], ("text",))
+        self.assertEqual(
+            MINIMAX_MODELS["MiniMax-M2.7"]["thinking_modes"],
+            ("always-on",),
+        )
 
     def test_regional_endpoints(self):
         from llm_provider import MINIMAX_REGIONAL_ENDPOINTS
-        self.assertEqual(MINIMAX_REGIONAL_ENDPOINTS["global_en"], "https://api.minimax.io/v1")
-        self.assertEqual(MINIMAX_REGIONAL_ENDPOINTS["cn_zh"], "https://api.minimaxi.com/v1")
+        self.assertEqual(
+            MINIMAX_REGIONAL_ENDPOINTS["global_en"],
+            {
+                "openai": "https://api.minimax.io/v1",
+                "anthropic": "https://api.minimax.io/anthropic",
+            },
+        )
+        self.assertEqual(
+            MINIMAX_REGIONAL_ENDPOINTS["cn_zh"],
+            {
+                "openai": "https://api.minimaxi.com/v1",
+                "anthropic": "https://api.minimaxi.com/anthropic",
+            },
+        )
 
     def test_supported_providers(self):
         from llm_provider import SUPPORTED_PROVIDERS

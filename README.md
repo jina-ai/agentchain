@@ -29,6 +29,11 @@ MINIMAX_API_KEY={YOUR_MINIMAX_API_KEY}   # get yours at https://platform.minimax
 MINIMAX_MODEL=MiniMax-M3                 # optional, default: MiniMax-M3 (also: MiniMax-M2.7)
 MINIMAX_REGION=global_en                 # optional, default: global_en (also: cn_zh for the China endpoint)
 
+# MiniMax-M3 accepts text, image, and video input and supports adaptive or
+# disabled thinking. MiniMax-M2.7 accepts text and always uses thinking.
+# The provider registry also records the regional OpenAI- and
+# Anthropic-compatible endpoint URLs.
+
 # These environment variables are needed in case you want the agent to be able to make phone calls
 AWS_ACCESS_KEY_ID={YOUR_AWS_ACCESS_KEY_ID}
 AWS_SECRET_ACCESS_KEY={YOUR_AWS_SECRET_ACCESS_KEY}
