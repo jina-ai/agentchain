@@ -1,0 +1,42 @@
+name: LLM provider tests
+
+on:
+  push:
+    paths:
+      - 'llm_provider.py'
+      - 'minimax_llm.py'
+      - 'main.py'
+      - 'requirements.txt'
+      - 'tests/**'
+      - '.github/workflows/llm-provider-tests.yml'
+  pull_request:
+    paths:
+      - 'llm_provider.py'
+      - 'minimax_llm.py'
+      - 'main.py'
+      - 'requirements.txt'
+      - 'tests/**'
+      - '.github/workflows/llm-provider-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-provider-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install only the text runtime dependencies
+        run: |
+          python -m pip install 'langchain==0.0.101' 'openai>=0.27,<1'
+      - name: Test the SDK HTTP boundary without credentials
+        run: |
+          env -i PATH="$PATH" HOME="$HOME" LANG=C.UTF-8 python -m unittest discover -s tests -v
+          env -i PATH="$PATH" HOME="$HOME" LANG=C.UTF-8 python -m py_compile main.py llm_provider.py minimax_llm.py tests/test_llm_provider.py tests/test_minimax_transport.py
+          git diff --check

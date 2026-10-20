@@ -33,6 +33,37 @@ AWS_S3_BUCKET_NAME={YOUR_AWS_S3_BUCKET_NAME} # make sure to create an S3 bucket 
 5. Run the main script: `python main.py`
 
 
+## MiniMax text provider
+
+Set `LLM_PROVIDER=minimax` and `MINIMAX_API_KEY` to use MiniMax for the central
+text agent. `MINIMAX_MODEL` defaults to `MiniMax-M3.1-Flash`; the ordinary model
+choices are `MiniMax-M3.1-Flash` and `MiniMax-M3`. Explicit legacy or custom model
+IDs are passed through unchanged.
+
+`MINIMAX_REGION` selects `global_en` (default, `https://api.minimax.io/v1`) or
+`cn_zh` (`https://api.minimaxi.com/v1`). Requests use Chat Completions with the
+repository's pinned LangChain client and the compatible `openai>=0.27,<1` SDK.
+The endpoint registry also records Anthropic-compatible URLs as metadata;
+this factory does not select that transport.
+
+Thinking and effort are omitted from requests: Flash uses the API's adaptive
+thinking and `max` effort defaults. It does not support disabled thinking. M3
+also defaults to adaptive thinking on this transport. Model metadata describes
+image/video capabilities; AgentChain's existing media tools and text prompt
+construction remain unchanged.
+
+Pricing metadata describes standard API usage: Flash input/output/cache-read
+costs are $0.15/$0.60/$0.015 per million tokens. M3 costs are $0.30/$1.20/$0.06
+through 512k input tokens, and $0.60/$2.40/$0.12 above 512k; M3 priority costs 1.5x.
+See the [model documentation](https://platform.minimax.io/docs/guides/models-intro)
+and [pricing](https://platform.minimax.io/docs/pricing/overview).
+
+Run the offline provider tests without loading the GPU models:
+
+```shell
+python -m unittest discover -s tests -v
+```
+
 ## System requirements
 As of [this commit](https://github.com/jina-ai/agentchain/commit/da588a728c390fb538fd361d4f41dd50aa193751), it is needed to have at least 29 GB of GPU memory to run the AgentChain.
 However, make sure to assign GPU devices correctly in `main.py`.
