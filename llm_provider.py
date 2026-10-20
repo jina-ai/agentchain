@@ -8,32 +8,42 @@ select a regional endpoint with ``MINIMAX_REGION``.
 import os
 
 
+# Ordinary choices only; explicit saved/custom model IDs remain valid.
 MINIMAX_MODELS = {
+    "MiniMax-M3.1-Flash": {
+        "context_window": 1_000_000,
+        "max_output_tokens": 524_288,
+        "pricing_usd_per_million_tokens": {
+            "input": 0.15,
+            "output": 0.60,
+            "cache_read": 0.015,
+            "cache_write": None,
+        },
+        "input_modalities": ("text", "image", "video"),
+        "thinking": ("adaptive",),
+        "reasoning_effort": ("low", "medium", "high", "xhigh", "max"),
+    },
     "MiniMax-M3": {
         "context_window": 1_000_000,
         "pricing_usd_per_million_tokens": {
+            "input": 0.3,
+            "output": 1.2,
+            "cache_read": 0.06,
+            "cache_write": None,
+        },
+        "pricing_above_512k_usd_per_million_tokens": {
             "input": 0.6,
             "output": 2.4,
             "cache_read": 0.12,
             "cache_write": None,
         },
+        "priority_price_multiplier": 1.5,
         "input_modalities": ("text", "image", "video"),
         "thinking": ("adaptive", "disabled"),
     },
-    "MiniMax-M2.7": {
-        "context_window": 204_800,
-        "pricing_usd_per_million_tokens": {
-            "input": 0.3,
-            "output": 1.2,
-            "cache_read": 0.06,
-            "cache_write": 0.375,
-        },
-        "input_modalities": ("text",),
-        "thinking": ("always_on",),
-    },
 }
 
-DEFAULT_MINIMAX_MODEL = "MiniMax-M3"
+DEFAULT_MINIMAX_MODEL = "MiniMax-M3.1-Flash"
 
 MINIMAX_REGIONAL_ENDPOINTS = {
     "global_en": {
@@ -106,17 +116,19 @@ def _create_minimax_llm(temperature):
         raise ValueError("MINIMAX_API_KEY environment variable is required")
 
     model = os.environ.get("MINIMAX_MODEL", DEFAULT_MINIMAX_MODEL)
-    if model not in MINIMAX_MODELS:
-        raise ValueError(
-            f"Unsupported MiniMax model: '{model}'. "
-            f"Supported models: {', '.join(MINIMAX_MODELS.keys())}"
-        )
+    if not model.strip():
+        raise ValueError("MINIMAX_MODEL must not be empty")
 
-    from langchain.chat_models import ChatOpenAI
+    from minimax_llm import MiniMaxChat
 
-    return ChatOpenAI(
+    # Omit thinking/effort to use the API's adaptive/max defaults for Flash.
+    # Do not impose Flash-only parameters on explicit legacy/custom models.
+    return MiniMaxChat(
         model_name=model,
         openai_api_key=api_key,
-        openai_api_base=_resolve_minimax_base_url("openai"),
-        temperature=_clamp_temperature(temperature, "minimax"),
+        model_kwargs={
+            "api_key": api_key,
+            "api_base": _resolve_minimax_base_url("openai"),
+            "temperature": _clamp_temperature(temperature, "minimax"),
+        },
     )
