@@ -27,7 +27,8 @@ class TestMiniMaxTransport(unittest.TestCase):
         self.transport = patch.object(requests.Session, "send", self.respond)
         self.transport.start()
         self.addCleanup(self.transport.stop)
-        self.globals = patch.multiple(openai, api_key="fixture-existing", api_base="https://api.openai.com/v1")
+        existing_key = "fixture-existing"
+        self.globals = patch.multiple(openai, api_key=existing_key, api_base="https://api.openai.com/v1")
         self.globals.start()
         self.addCleanup(self.globals.stop)
 
@@ -39,7 +40,7 @@ class TestMiniMaxTransport(unittest.TestCase):
         response._content = json.dumps({
             "id": "fixture", "object": "chat.completion",
             "choices": [{"index": 0, "finish_reason": "stop",
-                         "message": {"role": "assistant", "content": "Final Answer: fixture answer"},
+                         "message": {"role": "assistant", "content": "AI: fixture answer"},
                          "text": "fixture completion"}],
             "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
         }).encode()
@@ -55,7 +56,7 @@ class TestMiniMaxTransport(unittest.TestCase):
                         env["MINIMAX_MODEL"] = model
                     with patch.dict(os.environ, env):
                         llm = get_llm(temperature=0)
-                        self.assertEqual(llm("saved conversation", stop=["Observation:"]), "Final Answer: fixture answer")
+                        self.assertEqual(llm("saved conversation", stop=["Observation:"]), "AI: fixture answer")
                     request = self.requests[-1]
                     payload = json.loads(request.body)
                     self.assertEqual(request.url, f"https://{host}/v1/chat/completions")
